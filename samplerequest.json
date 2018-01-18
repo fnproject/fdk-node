@@ -1,0 +1,53 @@
+{
+  "call_id": "01C433NT3V47WGA00000000000",
+  "content_type": "application\/json",
+  "body": "shaun\n",
+  "protocol": {
+    "type": "sync",
+    "request_url": "\/r\/fdkdemo\/hello",
+    "headers": {
+      "Accept-Encoding": [
+        "gzip"
+      ],
+      "Content-Type": [
+        "application\/json"
+      ],
+      "Fn_app_name": [
+        "fdkdemo"
+      ],
+      "Fn_call_id": [
+        "01C433NT3V47WGA00000000000"
+      ],
+      "Fn_deadline": [
+        "2018-01-17T22:26:49.387Z"
+      ],
+      "Fn_format": [
+        "json"
+      ],
+      "Fn_memory": [
+        "128"
+      ],
+      "Fn_method": [
+        "POST"
+      ],
+      "Fn_param_app": [
+        "fdkdemo"
+      ],
+      "Fn_param_route": [
+        "\/hello"
+      ],
+      "Fn_path": [
+        "\/hello"
+      ],
+      "Fn_request_url": [
+        "http:\/\/localhost:8080\/r\/fdkdemo\/hello"
+      ],
+      "Fn_type": [
+        "sync"
+      ],
+      "User-Agent": [
+        "Go-http-client\/1.1"
+      ]
+    }
+  }
+}
