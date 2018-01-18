@@ -4,6 +4,11 @@ var rewire = require('rewire');
 const { Readable } = require('stream');
 const { Writable } = require('stream');
 
+/*
+ * MockStdout is a very simple mock that can return
+ * a single string--a single function input
+ */
+
 class MockStdout extends Writable {
   constructor(options) {
     super(options);
@@ -15,6 +20,10 @@ class MockStdout extends Writable {
   }
 }
 
+/*
+ * MockStdout is a very simple mock that can be 
+ * used to verify output to stdout.
+ */
 
 class MockStdin extends Readable {
   constructor(opt) {
@@ -36,6 +45,7 @@ class MockStdin extends Readable {
 /*
  *  Handler Dispatch tests 
  */
+
 
 test('default dispatch no format declared', function(t) {
   var fdk = rewire('../fn-fdk.js');
@@ -268,6 +278,8 @@ test('default function body from stdin', function(t) {
 
   t.end();
 });
+
+
 
 /*
  *  JSON format tests
