@@ -3,9 +3,12 @@
   Usage: handle(function(body, context))
 */
 
-var JSONStream = require('JSONStream')
+const JSONStream = require('JSONStream')
   , es = require('event-stream')
   , fs = require('fs')
+  , { DefaultContext } = require('./lib/context.js')
+  , { JSONContext } = require('./lib/context.js')
+  , fnFunctionExceptionMessage = 'Exception in function--consult logs for details';
   
 
 exports.handle = function(fnfunction) {
@@ -32,79 +35,63 @@ exports.handle = function(fnfunction) {
 
 function handleDefault(fnfunction) {
   try {
-    var input = readStdIn();
-    var ctx = buildEnvContext();
+    var input = fs.readFileSync('/dev/stdin').toString();
+    var ctx = new DefaultContext(process.env);
     // TODO: capture stdin and stderr and label and route to Fn logs
     var output = fnfunction(input, ctx);
-    writeStdout(output);
+    process.stdout.write(output);
   } catch(e) {
-    writeStderr(e.message);
+    process.stderr(e.message);
   }
 }
 
 function handleJSON(fnfunction) {
   process.stdin
     .pipe(
-      // each object in stream
+      // parse out a request at at time
       JSONStream.parse())
     .pipe(
       es.mapSync(function(request){
-        // TODO: error handling
-        var ctx = buildJSONContext(request);
+        var ctx = new JSONContext(request);
         // TODO: support user setting response headers
-        var result = fnfunction(request.body, ctx);
-        return buildJSONResponse(result, ctx);
+        var result, fnFuncError;
+        try {
+          // TODO: Capture function std io
+          result = fnfunction(request.body, ctx);
+        } catch (error) {
+          fnFuncError = error;
+        }
+        if (!fnFuncError) {
+          return buildJSONResponse(result, ctx);
+        } else {
+          return buildJSONError(fnFuncError, ctx);
+        }
       }))
     .pipe(JSONStream.stringify(false))
     .pipe(process.stdout);
 }
 
+
 function buildJSONResponse(result, context) {
+  var body = JSON.stringify(result);
   return {
-    body: result,
-    content_type: context['Content-Type'],
-    protocol: {
+    body: body,
+    // assume same content type as request 
+    // TODO: allow specifiction
+    content_type: context.getConfig('Content-Type'),
+    headers: {
       status_code: 200
     }
   };
 }
 
-function buildJSONContext(request) {
-  var ctx = {};
-  // root properties
-  ctx.call_id = request.call_id;
-  // header properties
-  var headers = request.protocol.headers;
-  for (var propertyName in headers) {
-    var ctxKey = propertyName;
-    if (propertyName.startsWith("Fn_")) {
-      ctxKey = propertyName.substr(3,propertyName.length -1);
+// TODO: confirm structure of error response
+function buildJSONError(error, context) {
+  return {    
+    body: 'Exception in function--consult logs for details',
+    content_type: "application/text",
+    headers: {
+      status_code: 500
     }
-    ctx[ctxKey] = headers[propertyName][0];
-  }
-  return ctx;
-}
-
-function buildEnvContext() {
-  var ctx = {};
-  for (var propertyName in process.env) {
-    var ctxKey = propertyName;
-    if (propertyName.startsWith("FN_")) {
-      ctxKey = propertyName.substr(3,propertyName.length -1);
-    }
-    ctx[ctxKey] = process.env[propertyName];
-  }
-  return ctx;
-}
-
-function readStdIn() {
-  return fs.readFileSync('/dev/stdin').toString();
-}
-
-function writeStdout(message) {
-  process.stdout.write(message);
-}
-
-function writeStderr(message) {
-  process.stderr.write(message);
+  };
 }

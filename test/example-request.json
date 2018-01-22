@@ -1,7 +1,7 @@
 {
   "call_id": "01C433NT3V47WGA00000000000", 
   "content_type": "application\/json",
-  "body": "shaun\n",
+  "body": "shaun",
   "protocol": {
     "type": "sync",
     "request_url": "\/r\/fdkdemo\/hello",

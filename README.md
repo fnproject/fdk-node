@@ -55,6 +55,31 @@ In both cases you'll get the response:
 Hello Tom from Node!
 ```
 
+
+# Function Context
+
+Function invocation context details are available through an optional function argument.
+To receive a context object, simply add a second argument to your handler function.
+in the following example the `call_id` is obtained from the context and included in 
+the response message:
+
+```javascript
+var fdk=require('fn-fdk');
+
+fdk.handle(function(input, ctx){
+  var name = 'World';
+  if (input) {
+    name = input;
+  }
+  return 'Hello ' + name + ' from Node call ' + ctx.call_id + '!';
+})
+```
+
+In the case of `default` format functions the context give you access to all environment variables
+including those defined through function or app config as well as those automatically provided
+by Fn like `app_name`, `path`, `memory`, etc.
+
+
 # Hot Functions with the FDK
 
 To make our function a hot function we simple specify the function `format` in the `func.yaml`.
