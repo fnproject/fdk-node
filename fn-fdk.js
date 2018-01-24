@@ -9,7 +9,6 @@ const JSONStream = require('JSONStream')
   , { DefaultContext } = require('./lib/context.js')
   , { JSONContext } = require('./lib/context.js')
   , fnFunctionExceptionMessage = 'Exception in function--consult logs for details';
-  
 
 exports.handle = function(fnfunction) {
   var fn_format = process.env.FN_FORMAT;
@@ -39,6 +38,8 @@ function handleDefault(fnfunction) {
     var ctx = new DefaultContext(process.env);
     // TODO: capture stdin and stderr and label and route to Fn logs
     var output = fnfunction(input, ctx);
+    // if nothing returned then return empty string
+    output = output ? output : '';
     process.stdout.write(output);
   } catch(e) {
     process.stderr(e.message);
@@ -46,31 +47,32 @@ function handleDefault(fnfunction) {
 }
 
 function handleJSON(fnfunction) {
-  process.stdin
-    .pipe(
-      // parse out a request at at time
-      JSONStream.parse())
-    .pipe(
-      es.mapSync(function(request){
-        var ctx = new JSONContext(request);
-        // TODO: support user setting response headers
-        var result, fnFuncError;
-        try {
-          // TODO: Capture function std io
-          result = fnfunction(request.body, ctx);
-        } catch (error) {
-          fnFuncError = error;
-        }
-        if (!fnFuncError) {
-          return buildJSONResponse(result, ctx);
-        } else {
-          return buildJSONError(fnFuncError, ctx);
-        }
-      }))
-    .pipe(JSONStream.stringify(false))
-    .pipe(process.stdout);
-}
+  try {
+    process.stdin
+      .pipe(
+        // parse out a request at at time
+        JSONStream.parse())
+      .pipe(
+        es.mapSync(function(request){          
+          try {
+            var ctx = new JSONContext(request);
+            // TODO: support user setting response headers
+            // TODO: capture stdin and stderr and label and route to Fn logs
+            var output = fnfunction(JSON.parse(request.body), ctx);
+            // if nothing returned then return empty string
+            output = output ? output : '';
+            return buildJSONResponse(output, ctx);
+          } catch (error) {
+            return buildJSONError(error);
+          }
+        }))
+      .pipe(JSONStream.stringify(false))
+      .pipe(process.stdout);
+  } catch (error) {
+    return buildJSONError(e);
+  }
 
+}
 
 function buildJSONResponse(result, context) {
   var body = JSON.stringify(result);
@@ -86,12 +88,14 @@ function buildJSONResponse(result, context) {
 }
 
 // TODO: confirm structure of error response
-function buildJSONError(error, context) {
+function buildJSONError(error) {
+  process.stderr.write(error.stack);
   return {    
-    body: 'Exception in function--consult logs for details',
+    body: fnFunctionExceptionMessage,
     content_type: "application/text",
     headers: {
       status_code: 500
     }
   };
 }
+

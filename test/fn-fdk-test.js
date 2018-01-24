@@ -67,24 +67,8 @@ test('JSON dispatch with format declared', function(t) {
   t.end();
 });
 
-// test('Dispatch unknown format declared', function(t) {
-//   var fdk = rewire('../fn-fdk.js');
+// TODO: test 'Dispatch unknown format returns error'
 
-//   fdk.__set__({
-//     process: {
-//       env: {"FN_FORMAT": "json"}
-//     },
-//     handleDefault: function(fnfunction) {
-//       t.fail('default handler called')
-//     },
-//     handleJSON: function(fnfunction) {
-//       t.fail('JSON handler called')
-//     }
-//   });
-
-//   fdk.handle(null);
-//   t.end();
-// });
 /**
  *  Default format tests
  */ 
@@ -102,9 +86,9 @@ test('build default context', function(t) {
 
   const DefaultContext = fdk.__get__("DefaultContext");
   var ctx = new DefaultContext(envVars);
-  t.equals(ctx.getConfig(one), one);
-  t.equals(ctx.app_name, "myapp", 'FN_ prefix stripped');
-  t.equals(ctx.getConfig(three), three);
+  t.equal(ctx.getConfig(one), one);
+  t.equal(ctx.app_name, "myapp", 'FN_ prefix stripped');
+  t.equal(ctx.getConfig(three), three);
   t.end();
 });
 
@@ -122,14 +106,17 @@ test('default non-FN env var', function(t) {
     fs: new MockFs(t, '/dev/stdin', ""),
     process: {
       env: envVars,
-      stdout: new MockStdOutput(function(_) {}),
-      stderr: new MockStdOutput(function(_) {}),
+      stdin:  new MockStdin(function() {
+        t.fail('stdin read');
+      }),
+      stdout: new MockStdOutput(function() {}),
+      stderr: new MockStdOutput(function() {}),
     },
    });
 
   fdk.handle(function(body, ctx) {
     t.assert(ctx.getConfig(envKey));
-    t.equals(ctx.getConfig(envKey), envValue, envKey + ' env var value');
+    t.equal(ctx.getConfig(envKey), envValue, envKey + ' env var value');
     return '';
   });
   t.end();
@@ -143,8 +130,11 @@ test('default function invocation with context', function(t) {
     fs: new MockFs(t, '/dev/stdin', inputMessage),
     process: {
       env: {},
-      stdout: new MockStdOutput(function(_) {}),
-      stderr: new MockStdOutput(function(_) {}),
+      stdin:  new MockStdin(function() {
+        t.fail('stdin read');
+      }),
+      stdout: new MockStdOutput(function() {}),
+      stderr: new MockStdOutput(function() {}),
     },
    });
 
@@ -165,8 +155,11 @@ test('default function invocation no context', function(t) {
     fs: new MockFs(t, '/dev/stdin', inputMessage),
     process: {
       env: {},
-      stdout: new MockStdOutput(function(_) {}),
-      stderr: new MockStdOutput(function(_) {}),
+      stdin:  new MockStdin(function() {
+        t.fail('stdin read');
+      }),
+      stdout: new MockStdOutput(function() {}),
+      stderr: new MockStdOutput(function() {}),
     },
     });
     
@@ -182,19 +175,22 @@ test('default function body from stdin', function(t) {
   var fdk = rewire('../fn-fdk.js')
     , inputMessage = "testbody";
 
-    fdk.__set__({
-      fs: new MockFs(t, '/dev/stdin', inputMessage),
-      process: {
-        env: {},
-        stdout: new MockStdOutput(function(_) {}),
-        stderr: new MockStdOutput(function(outputMessage) {
-          t.equals(outputMessage, inputMessage);
-        }),
-      },
-      });
+  fdk.__set__({
+    fs: new MockFs(t, '/dev/stdin', inputMessage),
+    process: {
+      env: {},
+      stdin:  new MockStdin(function() {
+        t.fail('stdin read');
+      }),
+      stdout: new MockStdOutput(function() {}),
+      stderr: new MockStdOutput(function(outputMessage) {
+        t.equal(outputMessage, inputMessage);
+      }),
+    }
+  });
 
   fdk.handle(function(body, ctx) {
-    t.equals(body, inputMessage);
+    t.equal(body, inputMessage);
     return body;
   });
   t.end();
@@ -233,19 +229,19 @@ test('build JSON context', function(t) {
   var ctx = new JSONContext(request);
 
   var headers = request.protocol.headers;
-  t.equals(ctx.getConfig("MY_HEADER"), headers["MY_HEADER"][0]);
-  t.equals(ctx.getConfig("Content-Type"), headers["Content-Type"][0]);
-  t.equals(ctx.app_name, headers["Fn_app_name"][0], 'app_name');
-  t.equals(ctx.call_id, headers["Fn_call_id"][0], 'call_id');
-  t.equals(ctx.deadline, headers["Fn_deadline"][0], 'deadline');
-  t.equals(ctx.format, headers["Fn_format"][0], 'format');
-  t.equals(ctx.memory, headers["Fn_memory"][0], 'memory');
-  t.equals(ctx.method, headers["Fn_method"][0], 'method');
-  t.equals(ctx.param_app, headers["Fn_param_app"][0], 'param');
-  t.equals(ctx.param_route, headers["Fn_param_route"][0], 'param_route');
-  t.equals(ctx.path, headers["Fn_path"][0], 'path');
-  t.equals(ctx.request_url, headers["Fn_request_url"][0], 'request_url');
-  t.equals(ctx.type, headers["Fn_type"][0], 'type');
+  t.equal(ctx.getConfig("MY_HEADER"), headers["MY_HEADER"][0]);
+  t.equal(ctx.getConfig("Content-Type"), headers["Content-Type"][0]);
+  t.equal(ctx.app_name, headers["Fn_app_name"][0], 'app_name');
+  t.equal(ctx.call_id, headers["Fn_call_id"][0], 'call_id');
+  t.equal(ctx.deadline, headers["Fn_deadline"][0], 'deadline');
+  t.equal(ctx.format, headers["Fn_format"][0], 'format');
+  t.equal(ctx.memory, headers["Fn_memory"][0], 'memory');
+  t.equal(ctx.method, headers["Fn_method"][0], 'method');
+  t.equal(ctx.param_app, headers["Fn_param_app"][0], 'param');
+  t.equal(ctx.param_route, headers["Fn_param_route"][0], 'param_route');
+  t.equal(ctx.path, headers["Fn_path"][0], 'path');
+  t.equal(ctx.request_url, headers["Fn_request_url"][0], 'request_url');
+  t.equal(ctx.type, headers["Fn_type"][0], 'type');
   t.end();
 });
 
@@ -253,25 +249,24 @@ test('build JSON context', function(t) {
 
 test('JSON function invocation with context', function(t) {
   var fdk = rewire('../fn-fdk.js')
-    , expectedBody = "Jane"
+    , payload = "Jane"
     , call_id =  "01C433NT3V47WGA00000000000"
     , request = {
-        "body" : expectedBody, 
+        "body" : JSON.stringify(payload), 
         "protocol": {
           "headers": {
             "Fn_call_id": [call_id],
-            "Fn_app_name": ["fdkdemo"],
             "Content-Type": ["application\/json"]
           }
         }
-      }
-    , expectedResponse = expectedBody + request.protocol.headers["Fn_call_id"][0];
+      };
 
   fdk.__set__({
     process: {
       env: {"FN_FORMAT": "json"},
+      stderr: new MockStdOutput(function() {}),
       stdin:  new MockStdin(JSON.stringify(request)),
-      stdout: new MockStdOutput(function (_) {})
+      stdout: new MockStdOutput(function () {})
     }
   });
 
@@ -279,8 +274,8 @@ test('JSON function invocation with context', function(t) {
     // function delares both body and optional context
     t.assert(body, "fn function invoked with body")
     t.assert(ctx, "fn function invoked with context");
-    t.equals(body, expectedBody);
-    t.equals(ctx.call_id, call_id, 'call_id context value');
+    t.equal(body, payload);
+    t.equal(ctx.call_id, call_id, 'call_id context value');
     return "";
   });
   t.end();
@@ -298,8 +293,9 @@ test('JSON function invocation no context', function(t) {
   fdk.__set__({
     process: {
       env: {"FN_FORMAT": "json"},
+      stderr: new MockStdOutput(function() {}),
       stdin: new MockStdin(JSON.stringify(request)),
-      stdout:  new MockStdOutput(function (_) {})
+      stdout:  new MockStdOutput(function () {})
     }
   });
 
@@ -314,7 +310,8 @@ test('JSON function invocation no context', function(t) {
 
 test('JSON function body and response', function(t) {
   var fdk = rewire('../fn-fdk.js')
-    , inputBody = "Jane"
+    , payload = "Jane"
+    , inputBody = JSON.stringify(payload)
     , request = {
         "body": inputBody,
         "protocol": {
@@ -323,50 +320,54 @@ test('JSON function body and response', function(t) {
             "Content-Type":["application/json"]}
         }
       }
-    , expectedCallId = request.protocol.headers["Fn_call_id"][0]
     , expectedOutputContentType = request.protocol.headers["Content-Type"][0]
-    , expectedOutputBody = inputBody + request.protocol.headers["Fn_call_id"][0]
+    , expectedOutputPayload = payload + request.protocol.headers["Fn_call_id"][0]
     , expectedJSONResponse = buildJSONResponse(
-        expectedOutputBody, expectedOutputContentType, expectedCallId);
+        expectedOutputPayload, expectedOutputContentType);
 
   fdk.__set__({
     process: {
       env: {"FN_FORMAT": "json"},
+      stderr: new MockStdOutput(function(data) {
+        process.stderr.write(data);
+      }),
       stdin:  new MockStdin(JSON.stringify(request)),
       stdout: new MockStdOutput(function (chunk) {
         var response = JSON.parse(chunk);
-        t.deepEqual(expectedJSONResponse, response);
+        t.deepEqual(response, expectedJSONResponse);
     })
     }
   });
 
   fdk.handle(function(body, ctx) {
-    t.equals(body, inputBody);
+    t.equal(body, payload); //parsed JSON
     return body + ctx.call_id;
   });
   t.end();
 });
 
+
+
 test('JSON format function exception', function(t) {
   var fdk = rewire('../fn-fdk.js')
     , request = {
-        "body": '',
+        "body": JSON.stringify(''),
         "protocol": {
           "headers": {
             "Fn_call_id": ["1"]
           }
       }
     }
-    , expectedCallId = request.protocol.headers["Fn_call_id"][0]
     // FDK error message constant
     , expectedBody = fdk.__get__("fnFunctionExceptionMessage")
     , expectedOutputContentType = 'application/text'
     , expectedJSONResponse = buildJSONErrorResponse(
-        expectedBody, expectedOutputContentType, expectedCallId);
+        expectedBody, expectedOutputContentType);
 
   fdk.__set__({
     process: {
       env: {"FN_FORMAT": "json"},
+      stderr: new MockStdOutput(function() {}),
       stdin:  new MockStdin(JSON.stringify(request)),
       stdout: new MockStdOutput(function (chunk) {
         var response = JSON.parse(chunk);
@@ -376,34 +377,89 @@ test('JSON format function exception', function(t) {
   });
 
   fdk.handle(function(body, ctx) {
-    throw new NullPointerException("fail");
+    throw new Error("fail on purpose");
   });
   t.end();
 });
 
+// /**
+//  * Redirect standard io
+//  */
+// test('Redirect stdout and prefix', function(t) {
+//   t.plan(1);
+//   var fdk = rewire('../fn-fdk.js')
+//     , payload = "Tom";
 
+//   fdk.__set__({
+//     fs: new MockFs(t, '/dev/stdin', payload),
+//     process: {
+//       env: {},
+//       stdin:  new MockStdin(function() {
+//         t.fail('stdin read');  // TODO: should stdin access throw exception?
+//       }),
+//       stdout: new MockStdOutput(function() {
+//         t.fail('output on stdout');
+//       }),
+//       stderr: new MockStdOutput(function (line) {
+//         t.equal('[out] ' + payload);
+//       })
+//     }
+//   });
+
+//   fdk.handle(function(body, ctx) {
+//     process.stdout.write(body);
+//   });
+//   t.end();
+// });
+
+// test('Redirect stderr and prefix', function(t) {
+//   t.plan(1);
+//   var fdk = rewire('../fn-fdk.js')
+//     , payload = "Tom";
+
+//   fdk.__set__({
+//     fs: new MockFs(t, '/dev/stdin', payload),
+//     process: {
+//       env: {},
+//       stdin:  new MockStdin(function() {
+//         t.fail('stdin read'); // TODO: should stdin access throw exception?
+//       }),
+//       stdout: new MockStdOutput(function() {
+//         t.fail('output on stdout');
+//       }),
+//       stderr: new MockStdOutput(function (line) {
+//         t.equal('[err] ' + payload);
+//       })
+//     }
+//   });
+
+//   fdk.handle(function(body, ctx) {
+//     process.stderr.write(body);
+//   });
+//   t.end();
+// });
 
 
 /**
  * Utilities
  */
 
-function buildJSONResponse(body, contentType, callId) {
+function buildJSONResponse(payload, contentType) {
   return {
-    body: body,
-    call_id: callId,
+    body: JSON.stringify(payload),
     content_type: contentType,
-    protocol: {
+    headers: {
       status_code: 200
     }
   };
 }
 
-function buildJSONErrorResponse(errorMessage, contentType, callId) {
+function buildJSONErrorResponse(errorMessage, contentType) {
   return {
-    call_id: callId,
     body: errorMessage,
     content_type: contentType,
-    status_code: 500
+    headers: {
+      status_code: 500
+    }
   }
 };

@@ -8,13 +8,14 @@ const { Writable } = require('stream');
 
 class MockStdOutput extends Writable {
   constructor(writeCallback) {
-    super(writeCallback);
+    super();
     this.writeCallback = writeCallback;
   }
 
-  _write(chunk, encoding, callback) {
-    this.writeCallback(chunk, encoding, callback);
+  _write(chunk, encoding, done) {
+    this.writeCallback(chunk.toString(), encoding);
   }
+
 }
 
 /**
@@ -50,8 +51,11 @@ class MockFs {
   }
 
   readFileSync(name) {
-    this.tape.equals(name, this.fileName,"unexpected file read");
-    return this.fileContents;
+    if (name === this.fileName) {
+      return this.fileContents;
+    } else {
+      this.tape.fail('Unexepected file read request: ' + name);
+    }
   }
 
 }
