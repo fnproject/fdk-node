@@ -1,101 +1,149 @@
+"use strict";
 /*
-
   Usage: handle(function(body, context))
 */
 
-const JSONStream = require('JSONStream')
-  , es = require('event-stream')
-  , fs = require('fs')
-  , { DefaultContext } = require('./lib/context.js')
-  , { JSONContext } = require('./lib/context.js')
-  , fnFunctionExceptionMessage = 'Exception in function--consult logs for details';
+const JSONParser = require('jsonparse')
+    , fs = require('fs')
+    , {DefaultContext, JSONContext} = require('./lib/context.js')
+    , fnFunctionExceptionMessage = 'Exception in function--consult logs for details';
 
-exports.handle = function(fnfunction) {
-  var fn_format = process.env.FN_FORMAT;
-  var fdkhandler = handleDefault;
+exports.handle = function (fnfunction) {
+    let fn_format = process.env["FN_FORMAT"] || "";
+    let fdkhandler;
 
-  if (fn_format) {
     // format has been explicitly specified
-    switch (fn_format) {
-      case "json" :
-        fdkhandler = handleJSON;
-        break;
-      case "http" :
-        // TODO: unsupported--HTTP 501
-        break;
-      default:
-        // TODO: unknown format--HTTP 501
+    switch (fn_format.toLowerCase()) {
+        case "json" :
+            fdkhandler = handleJSON;
+            break;
+        case "default":
+        case "":
+            fdkhandler = handleDefault;
+            break;
+        default:
+            console.log("Unsupported format " + fn_format);
+            process.exit(1);
+            return;
     }
-  }
 
-  // TODO: handle async
-  fdkhandler(fnfunction)
+    // TODO: handle async
+    fdkhandler(fnfunction)
+};
+
+
+function extractRequestBody(content_type,body){
+    if (content_type.toLowerCase().startsWith("application/json")) {
+        console.debug(`Parsing JSON body: '${body}'`)
+        return JSON.parse(body);
+    }
+    return body;
+
 }
 
 function handleDefault(fnfunction) {
-  try {
-    var input = fs.readFileSync('/dev/stdin').toString();
-    var ctx = new DefaultContext(process.env);
-    // TODO: capture stdin and stderr and label and route to Fn logs
-    var output = fnfunction(input, ctx);
-    // if nothing returned then return empty string
-    output = output ? output : '';
-    process.stdout.write(output);
-  } catch(e) {
-    process.stderr(e.message);
-  }
+    try {
+        let input = fs.readFileSync('/dev/stdin').toString();
+
+        let ctx = new DefaultContext(process.env);
+        // TODO: capture stdin and stderr and label and route to Fn logs
+        let output = fnfunction(extractRequestBody(ctx.content_type,input), ctx);
+        // if nothing returned then return empty string
+        output = output ? output : '';
+        process.stdout.write(output);
+        process.exit(0);
+    } catch (e) {
+        process.stderr.write(e.message);
+        process.exit(1);
+    }
 }
 
 function handleJSON(fnfunction) {
-  try {
-    process.stdin
-      .pipe(
-        // parse out a request at at time
-        JSONStream.parse())
-      .pipe(
-        es.mapSync(function(request){          
-          try {
-            var ctx = new JSONContext(request);
-            // TODO: support user setting response headers
-            // TODO: capture stdin and stderr and label and route to Fn logs
-            var output = fnfunction(JSON.parse(request.body), ctx);
-            // if nothing returned then return empty string
-            output = output ? output : '';
-            return buildJSONResponse(output, ctx);
-          } catch (error) {
-            return buildJSONError(error);
-          }
-        }))
-      .pipe(JSONStream.stringify(false))
-      .pipe(process.stdout);
-  } catch (error) {
-    return buildJSONError(e);
-  }
+    let parser = new JSONParser();
 
+
+    parser._push = parser.push;
+    parser._pop = parser.pop;
+    let depth = 0;
+    parser.push = function () {
+        depth++;
+        this._push();
+    };
+    parser.pop = function () {
+        depth--;
+        this._pop();
+    };
+
+
+
+    let realStdout = process.stdout;
+    process.stdout = process.stderr;
+
+    process.stdin.on("data", function (data) {
+        parser.write(data);
+    });
+
+
+
+    parser.onError = function (error) {
+        console.log("Invalid JSON input event, exiting", error);
+        realStdout.write(buildJSONError(error, ctx));
+        process.exit(1);
+    };
+
+    parser.onValue = function (request) {
+        if(depth !==0){
+            return;
+        }
+
+        let ctx = new JSONContext(request);
+
+        let execPromise = new Promise(function (resolve, reject) {
+            try {
+                // TODO: support user setting response headers
+                // TODO: capture stdin and stderr and label and route to Fn logs
+
+                console.debug("request", request);
+
+                let input = extractRequestBody(ctx.content_type,request.body);
+
+
+                resolve(fnfunction(input, ctx));
+            } catch (error) {
+                reject(error);
+            }
+        });
+
+        execPromise.then(function (result) {
+            realStdout.write(buildJSONResponse(result, ctx));
+        }, function (error) {
+            realStdout.write(buildJSONError(error, ctx));
+        });
+    };
 }
 
 function buildJSONResponse(result, context) {
-  var body = JSON.stringify(result);
-  return {
-    body: body,
-    // assume same content type as request 
-    // TODO: allow specifiction
-    content_type: context.getConfig('Content-Type'),
-    headers: {
-      status_code: 200
-    }
-  };
+    let body = JSON.stringify(result);
+    return JSON.stringify({
+                              body: body,
+                              // assume same content type as request
+                              // TODO: allow specifiction
+                              content_type: context.getConfig('Content-Type'),
+                              protocol: {
+                                  status_code: 200
+                              }
+                          });
 }
 
 // TODO: confirm structure of error response
 function buildJSONError(error) {
-  process.stderr.write(error.stack);
-  return {    
-    body: fnFunctionExceptionMessage,
-    content_type: "application/text",
-    headers: {
-      status_code: 500
-    }
-  };
+    console.log("Error in function", error);
+    return JSON.stringify({
+                              body: fnFunctionExceptionMessage,
+                              content_type: "application/text",
+                              protocol: {
+                                  status_code: 500
+                              }
+                          });
 }
 

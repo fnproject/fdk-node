@@ -6,8 +6,21 @@ It currently supports default (cold) and hot functions using the JSON format.
 ## Implementing a Node Function
 
 Writing a Node.js function is simply a matter of writing a handler function
-that you pass to the FDK to invoke each time your function is called. For
-example here's a simple hello world function:
+that you pass to the FDK to invoke each time your function is called. 
+
+
+Start by creating a node function with `fn init` and installing the FDK: 
+
+
+```bash
+$ mkdir myfn 
+$ cd myfn 
+$ fn init --runtime node 
+$ npm install --save-dev fn-fdk
+```
+
+Here's a simple hello world function - save this to `func.js`.
+
 
 ```javascript
 var fdk=require('fn-fdk');
@@ -147,3 +160,17 @@ real  0m0.042s
 user  0m0.005s
 sys   0m0.006s
 ```
+
+# Asynchronous function responses 
+
+You return an asynchronous response from a function by returning a Javascript `Promise` from the function body: 
+
+```javascript
+var fdk=require('fn-fdk');
+
+fdk.handle(function(input, ctx){
+  return new Promise((resolve,reject)=>{
+     setTimeout(()=>resolve("Hello"),1000);
+  });
+})
+``` 
