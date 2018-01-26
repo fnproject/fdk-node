@@ -4,7 +4,7 @@
   "description": "Function Developer Kit for Fn",
   "main": "fn-fdk.js",
   "scripts": {
-    "test": "node test/fn-fdk-test.js"
+    "test": "standard && node test/fn-fdk-test.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "rewire": "^3.0.2",
-    "tape": "^4.8.0"
+    "tape": "^4.8.0",
+    "standard": "*"
   }
 }

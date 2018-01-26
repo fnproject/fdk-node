@@ -15,7 +15,7 @@ exports.handle = function (fnfunction) {
     // format has been explicitly specified
     switch (fn_format.toLowerCase()) {
         case "json" :
-            fdkhandler = handleJSON;
+            fdkhandler = handleJSON
             break;
         case "default":
         case "":
@@ -23,7 +23,7 @@ exports.handle = function (fnfunction) {
             break;
         default:
             console.log("Unsupported format " + fn_format);
-            process.exit(1);
+            process.exit(2);
             return;
     }
 
@@ -31,27 +31,33 @@ exports.handle = function (fnfunction) {
     fdkhandler(fnfunction)
 };
 
-
-function extractRequestBody(content_type,body){
+function extractRequestBody(content_type, body) {
     if (content_type.toLowerCase().startsWith("application/json")) {
         console.debug(`Parsing JSON body: '${body}'`)
         return JSON.parse(body);
     }
     return body;
-
 }
 
 function handleDefault(fnfunction) {
     try {
         let input = fs.readFileSync('/dev/stdin').toString();
+        let realStdout = process.stdout;
+        process.stdout = process.stderr;
 
-        let ctx = new DefaultContext(process.env);
-        // TODO: capture stdin and stderr and label and route to Fn logs
-        let output = fnfunction(extractRequestBody(ctx.content_type,input), ctx);
-        // if nothing returned then return empty string
-        output = output ? output : '';
-        process.stdout.write(output);
-        process.exit(0);
+        let ctxout = {content_type: "application/json"};
+        let ctx = new DefaultContext(process.env, ctxout);
+
+        new Promise(function (resolve, reject) {
+            resolve(fnfunction(extractRequestBody(ctx.content_type, input), ctx));
+
+        }).then(function (data) {
+            realStdout.write(convertResult(data, ctxout));
+            process.exit(0);
+        }, function (error) {
+            console.log("error in ")
+        });
+
     } catch (e) {
         process.stderr.write(e.message);
         process.exit(1);
@@ -61,6 +67,8 @@ function handleDefault(fnfunction) {
 function handleJSON(fnfunction) {
     let parser = new JSONParser();
 
+    let realStdout = process.stdout;
+    process.stdout = process.stderr;
 
     parser._push = parser.push;
     parser._pop = parser.pop;
@@ -74,16 +82,9 @@ function handleJSON(fnfunction) {
         this._pop();
     };
 
-
-
-    let realStdout = process.stdout;
-    process.stdout = process.stderr;
-
     process.stdin.on("data", function (data) {
         parser.write(data);
     });
-
-
 
     parser.onError = function (error) {
         console.log("Invalid JSON input event, exiting", error);
@@ -92,29 +93,21 @@ function handleJSON(fnfunction) {
     };
 
     parser.onValue = function (request) {
-        if(depth !==0){
+        if (depth !== 0) {
             return;
         }
 
         let ctx = new JSONContext(request);
 
-        let execPromise = new Promise(function (resolve, reject) {
+        new Promise(function (resolve, reject) {
+            let input;
             try {
-                // TODO: support user setting response headers
-                // TODO: capture stdin and stderr and label and route to Fn logs
-
-                console.debug("request", request);
-
-                let input = extractRequestBody(ctx.content_type,request.body);
-
-
-                resolve(fnfunction(input, ctx));
+                input = extractRequestBody(ctx.content_type, request.body);
             } catch (error) {
                 reject(error);
             }
-        });
-
-        execPromise.then(function (result) {
+            resolve(fnfunction(input, ctx));
+        }).then(function (result) {
             realStdout.write(buildJSONResponse(result, ctx));
         }, function (error) {
             realStdout.write(buildJSONError(error, ctx));
@@ -122,22 +115,30 @@ function handleJSON(fnfunction) {
     };
 }
 
-function buildJSONResponse(result, context) {
-    let body = JSON.stringify(result);
+function convertResult(result, contextout) {
+    if (contextout.content_type.startsWith("application/json")) {
+        return JSON.stringify(result);
+    } else {
+        return result !== null ? result.toString() : "";
+    }
+}
+
+function buildJSONResponse(result, contextout, protoout) {
+    let body = convertResult(result, contextout);
+
     return JSON.stringify({
                               body: body,
-                              // assume same content type as request
-                              // TODO: allow specifiction
-                              content_type: context.getConfig('Content-Type'),
+                              content_type: contextout.content_type,
                               protocol: {
-                                  status_code: 200
+                                  status_code: protoout.status_code,
+                                  headers: protoout.headers
                               }
                           });
 }
 
 // TODO: confirm structure of error response
 function buildJSONError(error) {
-    console.log("Error in function", error);
+    console.log("Error in function:", error);
     return JSON.stringify({
                               body: fnFunctionExceptionMessage,
                               content_type: "application/text",

@@ -174,3 +174,14 @@ fdk.handle(function(input, ctx){
   });
 })
 ``` 
+
+# Handling non-json input and output
+
+By default the FDK will input with a content-type matching `application/json` into a JSON object as the function input, if the incoming content type is different from `application/json` then the input will be the raw string value of the input. 
+
+Likewise by default the output of a function will be treated as a JSON object and converted using JSON.stringify - you can change this behaviour by setting the content type of the response in the context using `ctx.setContentType(...)`. Changing the content type to non-json will result in the output being treated as a string.  
+
+# TODO: 
+
+* eslinting 
+* NPM release & CD build  

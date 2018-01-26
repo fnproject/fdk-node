@@ -68,7 +68,6 @@ test('JSON dispatch with format declared', function (t) {
     fdk.handle(null);
 });
 
-
 /**
  *  Default format tests
  */
@@ -76,19 +75,52 @@ test('JSON dispatch with format declared', function (t) {
 test('build default context', function (t) {
     var fdk = rewire('../fn-fdk.js');
 
-    var envVars = {}
-        , one = "one"
-        , three = "three";
+    const fnappname = "myapp",
+        one = "one",
+        three = "three",
+        fntype = "sync",
+        fncallid = "01C4EQ8HR447WG200000000000",
+        fncontenttype = "application/json",
+        acceptencodingheaer = "gzip",
+        fnformat = "default",
+        fnpath = "/testfn",
+        fnmemory = "128",
+        fndeadline = "2018-01-22T10:40:45.108Z",
+        fnmethod = "GET",
+        useragentheader = "Go-http-client/1.1",
+        fnrequesturl = "http://localhost:8080/r/test/testfn",
+        body = "body";
 
-    envVars[one] = one;
-    envVars[three] = three;
-    envVars['FN_APP_NAME'] = "myapp";
+    const envVars = {
+        one: one,
+        three: three,
+        "FN_TYPE": fntype,
+        "FN_CALL_ID": fncallid,
+        "FN_HEADER_Content-Type": fncontenttype,
+        "FN_HEADER_Accept-Encoding": acceptencodingheaer,
+        "FN_FORMAT": fnformat,
+        "FN_PATH": fnpath,
+        "FN_MEMORY": fnmemory,
+        "FN_HEADER_Fn_deadline": fndeadline,
+        "FN_METHOD": fnmethod,
+        "FN_HEADER_User-Agent": useragentheader,
+        "FN_REQUEST_URL": fnrequesturl,
+        "FN_APP_NAME": fnappname
+    };
 
     const DefaultContext = fdk.__get__("DefaultContext");
-    var ctx = new DefaultContext(envVars);
-    t.equal(ctx.getConfig(one), one);
-    t.equal(ctx.app_name, "myapp", 'FN_ prefix stripped');
-    t.equal(ctx.getConfig(three), three);
+    let ctx = new DefaultContext(body, envVars);
+
+    t.equal(ctx.getConfig(one), one, 'config one');
+    t.equal(ctx.getConfig(three), three, 'config three');
+    t.equal(ctx.app_name, fnappname, 'app name');
+    t.equal(ctx.call_id, fncallid, 'call id');
+    t.equal(ctx.content_type, fncontenttype, 'content type');
+    t.equal(ctx.path, fnpath, 'path');
+    t.equal(ctx.memory, parseInt(fnmemory), 'memory');
+    t.equal(ctx.deadline, fndeadline, 'deadline');
+    t.equal(ctx.type, fntype, 'type');
+
     t.end();
 });
 
@@ -214,11 +246,9 @@ test('default function string from stdin', function (t) {
     });
 });
 
-
-
 test('default function json body from stdin', function (t) {
     var fdk = rewire('../fn-fdk.js')
-        ,inputMessageJSON = {"testMessage": "message"}
+        , inputMessageJSON = {"testMessage": "message"}
         , inputMessage = JSON.stringify(inputMessageJSON);
 
     fdk.__set__({
@@ -381,7 +411,7 @@ test('JSON function body and response', function (t) {
         , expectedJSONResponse = buildJSONResponse(
         expectedOutputPayload, expectedOutputContentType);
 
-    console.log("input: ",JSON.stringify(request));
+    console.log("input: ", JSON.stringify(request));
     fdk.__set__({
                     process: {
                         env: {"FN_FORMAT": "json"},
