@@ -1,5 +1,4 @@
-const { Readable } = require('stream');
-const { Writable } = require('stream');
+const {Readable, Writable} = require('stream')
 
 /**
  * MockStdOutput is a very simple mock that be used
@@ -7,15 +6,14 @@ const { Writable } = require('stream');
  */
 
 class MockStdOutput extends Writable {
-  constructor(writeCallback) {
-    super();
-    this.writeCallback = writeCallback;
+  constructor (writeCallback) {
+    super()
+    this.writeCallback = writeCallback
   }
 
-  _write(chunk, encoding, done) {
-    this.writeCallback(chunk.toString(), encoding);
+  _write (chunk, encoding, done) {
+    this.writeCallback(chunk.toString(), encoding)
   }
-
 }
 
 /**
@@ -24,18 +22,18 @@ class MockStdOutput extends Writable {
  */
 
 class MockStdin extends Readable {
-  constructor(inputValue) {
-    super();
-    this.input = inputValue;
+  constructor (inputValue) {
+    super()
+    this.input = inputValue
   }
 
-  _read() {
+  _read () {
     if (this.input) {
-      const buf = Buffer.from(this.input, 'ascii');
-      this.push(buf);
-      this.input = null;
+      const buf = Buffer.from(this.input, 'ascii')
+      this.push(buf)
+      this.input = null
     } else {
-      this.push(null);
+      this.push(null)
     }
   }
 }
@@ -44,22 +42,21 @@ class MockStdin extends Readable {
  * Simple fs mock that returns a string when a file is read.
  */
 class MockFs {
-  constructor(tapeTest, fileName, fileContents) {
-    this.tape = tapeTest;
-    this.fileName = fileName;
-    this.fileContents = fileContents;
+  constructor (tapeTest, fileName, fileContents) {
+    this.tape = tapeTest
+    this.fileName = fileName
+    this.fileContents = fileContents
   }
 
-  readFileSync(name) {
+  readFileSync (name) {
     if (name === this.fileName) {
-      return this.fileContents;
+      return this.fileContents
     } else {
-      this.tape.fail('Unexepected file read request: ' + name);
+      this.tape.fail('Unexepected file read request: ' + name)
     }
   }
-
 }
 
-module.exports.MockStdOutput = MockStdOutput;
-module.exports.MockStdin = MockStdin;
-module.exports.MockFs = MockFs;
+module.exports.MockStdOutput = MockStdOutput
+module.exports.MockStdin = MockStdin
+module.exports.MockFs = MockFs
