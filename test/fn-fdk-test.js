@@ -13,18 +13,19 @@ const {MockFs} = require('./mocks.js')
 test('default dispatch no format declared', function (t) {
   let fdk = rewire('../fn-fdk.js')
 
-  fdk.__set__({
-                process: {
-                  env: {}
-                },
-                handleDefault: function (fnfunction) {
-                  t.pass('default handler called')
-                  t.end()
-                },
-                handleJSON: function (fnfunction) {
-                  t.fail('JSON handler called')
-                }
-              })
+  fdk.__set__(
+    {
+      process: {
+        env: {}
+      },
+      handleDefault: function (fnfunction) {
+        t.pass('default handler called')
+        t.end()
+      },
+      handleJSON: function (fnfunction) {
+        t.fail('JSON handler called')
+      }
+    })
 
   fdk.handle(null)
 })
@@ -32,18 +33,19 @@ test('default dispatch no format declared', function (t) {
 test('default dispatch with format declared', function (t) {
   let fdk = rewire('../fn-fdk.js')
 
-  fdk.__set__({
-                process: {
-                  env: {'FN_FORMAT': 'default'}
-                },
-                handleDefault: function (fnfunction) {
-                  t.pass('default handler called')
-                  t.end()
-                },
-                handleJSON: function (fnfunction) {
-                  t.fail('JSON handler called')
-                }
-              })
+  fdk.__set__(
+    {
+      process: {
+        env: {'FN_FORMAT': 'default'}
+      },
+      handleDefault: function (fnfunction) {
+        t.pass('default handler called')
+        t.end()
+      },
+      handleJSON: function (fnfunction) {
+        t.fail('JSON handler called')
+      }
+    })
 
   fdk.handle(null)
 })
@@ -51,18 +53,19 @@ test('default dispatch with format declared', function (t) {
 test('JSON dispatch with format declared', function (t) {
   let fdk = rewire('../fn-fdk.js')
 
-  fdk.__set__({
-                process: {
-                  env: {'FN_FORMAT': 'json'}
-                },
-                handleDefault: function (fnfunction) {
-                  t.fail('default handler called')
-                },
-                handleJSON: function (fnfunction) {
-                  t.pass('JSON handler called')
-                  t.end()
-                }
-              })
+  fdk.__set__(
+    {
+      process: {
+        env: {'FN_FORMAT': 'json'}
+      },
+      handleDefault: function (fnfunction) {
+        t.fail('default handler called')
+      },
+      handleJSON: function (fnfunction) {
+        t.pass('JSON handler called')
+        t.end()
+      }
+    })
 
   fdk.handle(null)
 })
@@ -135,27 +138,27 @@ test('default non-FN env var', function (t) {
   const envKey = 'ABCDE'
   const envValue = '12345'
 
-  const envVars = {
-    envKey : envValue
-  }
+  let envVars = {}
+  envVars[envKey] = envValue
 
-  fdk.__set__({
-                fs: new MockFs(t, '/dev/stdin', ''),
-                process: {
-                  env: envVars,
-                  stdin: new MockStdin(function () {
-                    t.fail('stdin read')
-                  }),
-                  stdout: new MockStdOutput(function () {
-                  }),
-                  stderr: new MockStdOutput(function () {
-                  }),
-                  exit: function (code) {
-                    t.equals(code, 0)
-                    t.end()
-                  }
-                }
-              })
+  fdk.__set__(
+    {
+      fs: new MockFs(t, '/dev/stdin', ''),
+      process: {
+        env: envVars,
+        stdin: new MockStdin(function () {
+          t.fail('stdin read')
+        }),
+        stdout: new MockStdOutput(function () {
+        }),
+        stderr: new MockStdOutput(function () {
+        }),
+        exit: function (code) {
+          t.equals(code, 0)
+          t.end()
+        }
+      }
+    })
 
   fdk.handle(function (body, ctx) {
     t.equal(ctx.getConfig(envKey), envValue, envKey + ' env var value')
@@ -167,23 +170,24 @@ test('default function invocation with context', function (t) {
   let fdk = rewire('../fn-fdk.js')
   const inputMessage = 'testbody'
 
-  fdk.__set__({
-                fs: new MockFs(t, '/dev/stdin', inputMessage),
-                process: {
-                  env: {},
-                  stdin: new MockStdin(function () {
-                    t.fail('stdin read')
-                  }),
-                  stdout: new MockStdOutput(function () {
-                  }),
-                  stderr: new MockStdOutput(function () {
-                  }),
-                  exit: function (code) {
-                    t.equals(code, 0)
-                    t.end()
-                  }
-                }
-              })
+  fdk.__set__(
+    {
+      fs: new MockFs(t, '/dev/stdin', inputMessage),
+      process: {
+        env: {},
+        stdin: new MockStdin(function () {
+          t.fail('stdin read')
+        }),
+        stdout: new MockStdOutput(function () {
+        }),
+        stderr: new MockStdOutput(function () {
+        }),
+        exit: function (code) {
+          t.equals(code, 0)
+          t.end()
+        }
+      }
+    })
 
   fdk.handle(function (body, ctx) {
     // function delares both body and optional context
@@ -197,23 +201,24 @@ test('default function invocation no context', function (t) {
   let fdk = rewire('../fn-fdk.js')
   const inputMessage = 'testbody'
 
-  fdk.__set__({
-                fs: new MockFs(t, '/dev/stdin', inputMessage),
-                process: {
-                  env: {},
-                  stdin: new MockStdin(function () {
-                    t.fail('stdin read')
-                  }),
-                  stdout: new MockStdOutput(function () {
-                  }),
-                  stderr: new MockStdOutput(function () {
-                  }),
-                  exit: function (code) {
-                    t.equals(code, 0)
-                    t.end()
-                  }
-                }
-              })
+  fdk.__set__(
+    {
+      fs: new MockFs(t, '/dev/stdin', inputMessage),
+      process: {
+        env: {},
+        stdin: new MockStdin(function () {
+          t.fail('stdin read')
+        }),
+        stdout: new MockStdOutput(function () {
+        }),
+        stderr: new MockStdOutput(function () {
+        }),
+        exit: function (code) {
+          t.equals(code, 0)
+          t.end()
+        }
+      }
+    })
 
   fdk.handle(function (body) {
     // function does not declare context param
@@ -226,24 +231,25 @@ test('default function string from stdin', function (t) {
   let fdk = rewire('../fn-fdk.js')
   const inputMessage = 'testbody'
 
-  fdk.__set__({
-                fs: new MockFs(t, '/dev/stdin', inputMessage),
-                process: {
-                  env: {},
-                  stdin: new MockStdin(function () {
-                    t.fail('stdin read')
-                  }),
-                  stdout: new MockStdOutput(function () {
-                  }),
-                  stderr: new MockStdOutput(function (outputMessage) {
-                    t.equal(outputMessage, inputMessage)
-                  }),
-                  exit: function (code) {
-                    t.equals(code, 0)
-                    t.end()
-                  }
-                }
-              })
+  fdk.__set__(
+    {
+      fs: new MockFs(t, '/dev/stdin', inputMessage),
+      process: {
+        env: {},
+        stdin: new MockStdin(function () {
+          t.fail('stdin read')
+        }),
+        stdout: new MockStdOutput(function () {
+        }),
+        stderr: new MockStdOutput(function (outputMessage) {
+          t.equal(outputMessage, inputMessage)
+        }),
+        exit: function (code) {
+          t.equals(code, 0)
+          t.end()
+        }
+      }
+    })
 
   fdk.handle(function (body, ctx) {
     t.equal(body, inputMessage)
@@ -256,27 +262,28 @@ test('default function json body from stdin', function (t) {
   const inputMessageJSON = {'testMessage': 'message'}
   const inputMessage = JSON.stringify(inputMessageJSON)
 
-  fdk.__set__({
-                fs: new MockFs(t, '/dev/stdin', inputMessage),
-                process: {
-                  env: {'FN_HEADER_CONTENT_TYPE': 'application/json'},
-                  stdin: new MockStdin(function () {
-                    t.fail('stdin read')
-                  }),
-                  stdout: new MockStdOutput(function () {
-                  }),
-                  stderr: new MockStdOutput(function (outputMessage) {
-                    t.equal(outputMessage, inputMessage)
-                  }),
-                  exit: function (code) {
-                    t.equals(code, 0)
-                    t.end()
-                  }
-                }
-              })
+  fdk.__set__(
+    {
+      fs: new MockFs(t, '/dev/stdin', inputMessage),
+      process: {
+        env: {'FN_HEADER_CONTENT_TYPE': 'application/json'},
+        stdin: new MockStdin(function () {
+          t.fail('stdin read')
+        }),
+        stdout: new MockStdOutput(function () {
+        }),
+        stderr: new MockStdOutput(function (outputMessage) {
+          t.equal(outputMessage, inputMessage)
+        }),
+        exit: function (code) {
+          t.equals(code, 0)
+          t.end()
+        }
+      }
+    })
 
   fdk.handle(function (body, ctx) {
-    t.equal(body, inputMessageJSON)
+    t.deepEqual(body, inputMessageJSON)
     return body
   })
 })
@@ -303,9 +310,10 @@ test('build JSON context', function (t) {
 
   const contentType = 'application/json'
   const method = 'POST'
-  const requestUrl = 'http:\/\/localhost:8080\/r\/myapp\/hello'
+  const requestUrl = 'http://localhost:8080/r/myapp/hello'
   const callId = '01C4EQBEEF47WGA00000000000'
   const deadline = '2018-01-17T22:26:49.387Z'
+  const myheaderval = 'myheadervalue'
   const request = {
     'call_id': callId,
     'content_type': contentType,
@@ -315,95 +323,136 @@ test('build JSON context', function (t) {
       'headers': {
         'Fn_deadline': [deadline],
         'Fn_method': [method],
-        'Fn_request_url': [requestUrl],
         'Content-Type': [contentType],
-        'MY_HEADER': 'myheadervalue'
+        'MY_HEADER': [myheaderval]
       }
     }
   }
 
   const JSONContext = fdk.__get__('JSONContext')
-  var ctx = new JSONContext(env,request)
+  let ctx = new JSONContext(env, request)
 
-  var headers = request.protocol.headers
-
-  t.equal(ctx.getConfig('CONFIG_VAR'),'config-val')
+  t.equal(ctx.getConfig('CONFIG_VAR'), 'config-val')
   t.equal(ctx.appName, appName, 'appName')
   t.equal(ctx.callId, callId, 'callId')
-  t.equal(ctx.deadline,deadline, 'deadline')
+  t.equal(ctx.deadline, deadline, 'deadline')
   t.equal(ctx.format, 'json', 'format')
   t.equal(ctx.memory, parseInt(fnmemory), 'memory')
   t.equal(ctx.path, fnpath, 'path')
-  t.equal(ctx.requestUrl, requestUrl, 'requestUrl')
-  t.equal(ctx.type,fntype, 'type')
-  t.equal(ctx.content_type, request.content_type, 'content_type')
-  t.equal(ctx.protocol.method, headers['Fn_method'][0], 'method')
-  t.equal(ctx.protocol.headers, headers['Fn_method'][0], 'headers')
+  t.equal(ctx.type, fntype, 'type')
+  t.equal(ctx.contentType, request.content_type, 'content_type')
+  t.equal(ctx.protocol.requestUrl, requestUrl, 'requestUrl')
+  t.equal(ctx.protocol.method, method, 'method')
+  t.deepEqual(ctx.protocol.headers, {
+    'Content-Type': [contentType],
+    'My-Header': [myheaderval]
+  }, 'headers')
 
   t.end()
 })
 
 test('JSON function invocation with context', function (t) {
   let fdk = rewire('../fn-fdk.js')
-  const payload = '"Jane"'
-  const call_id = '01C433NT3V47WGA00000000000'
+
+  const payload = {msg: 'Jane'}
+  const callId = '01C433NT3V47WGA00000000000'
   const request = {
     'body': JSON.stringify(payload),
     'content_type': 'application/json',
+    'call_id': callId,
     'protocol': {
+      'request_url': 'http://a.proto/r/path',
       'headers': {
-        'Fn_call_id': [call_id],
-        'Content-Type': ['application\/json']
+        'Content-Type': ['application/json']
       }
     }
   }
 
-  fdk.__set__({
-                process: {
-                  env: {'FN_FORMAT': 'json'},
-                  stderr: new MockStdOutput(function () {
-                  }),
-                  stdin: new MockStdin(JSON.stringify(request)),
-                  stdout: new MockStdOutput(function () {
-                  })
-                }
-              })
+  fdk.__set__(
+    {
+      process: {
+        env: {'FN_FORMAT': 'json'},
+        stderr: new MockStdOutput(function () {
+        }),
+        stdin: new MockStdin(JSON.stringify(request)),
+        stdout: new MockStdOutput(function () {
+        })
+      }
+    })
 
   fdk.handle(function (body, ctx) {
-    // function delares both body and optional context
-    t.assert(body, 'fn function invoked with body')
-    t.assert(ctx, 'fn function invoked with context')
-    t.equal(body, payload)
-    t.equal(ctx.call_id, call_id, 'call_id context value')
+    t.deepEqual(body, payload)
+    t.equal(ctx.callId, callId, 'callId context value')
+    t.equal(ctx.contentType, 'application/json', 'content_type')
+    t.end()
     return ''
   })
-  t.end()
+})
+
+test('JSON function invocation with non-JSON content', function (t) {
+  let fdk = rewire('../fn-fdk.js')
+  const payload = 'Jane'
+  const callId = '01C433NT3V47WGA00000000000'
+  const request = {
+    'body': payload,
+    'content_type': 'text/plain',
+    'call_id': callId,
+    'protocol': {
+      'request_url': 'http://a.proto/r/path',
+      'headers': {
+        'Content-Type': ['application/json']
+      }
+    }
+  }
+
+  fdk.__set__(
+    {
+      process: {
+        env: {'FN_FORMAT': 'json'},
+        stderr: new MockStdOutput(function () {
+        }),
+        stdin: new MockStdin(JSON.stringify(request)),
+        stdout: new MockStdOutput(function () {
+        })
+      }
+    })
+
+  fdk.handle(function (body, ctx) {
+    t.equal(body, payload)
+    t.equal(ctx.callId, callId, 'call_id context value')
+    t.end()
+    return ''
+  })
 })
 
 test('JSON function invocation no context', function (t) {
   let fdk = rewire('../fn-fdk.js')
+  const payload = 'Jane'
   const request = {
-    'body': 'Jane',
+    'body': JSON.stringify(payload),
     'content_type': 'application/json',
+    'call_id': '_call_id_',
     'protocol': {
+      'request_url': 'http://a.proto/r/path',
       'headers': {}
     }
   }
 
-  fdk.__set__({
-                process: {
-                  env: {'FN_FORMAT': 'json'},
-                  stderr: new MockStdOutput(function () {
-                  }),
-                  stdin: new MockStdin(JSON.stringify(request)),
-                  stdout: new MockStdOutput(function () {
-                  })
-                }
-              })
+  fdk.__set__(
+    {
+      process: {
+        env: {'FN_FORMAT': 'json'},
+        stderr: new MockStdOutput(function () {
+        }),
+        stdin: new MockStdin(JSON.stringify(request)),
+        stdout: new MockStdOutput(function () {
+        })
+      }
+    })
 
   fdk.handle(function (body) {
     // function does not declare context param
-    t.assert(body, 'fn function invoked with body')
+    t.equal(body, payload, 'fn function invoked with body')
     return ''
   })
 
@@ -415,38 +464,41 @@ test('JSON function body and response', function (t) {
   const payload = 'Jane'
 
   const inputBody = JSON.stringify(payload)
+  const callId = '1'
+  const contentType = 'application/json'
   const request = {
     'body': inputBody,
-    'content_type': 'application/json',
+    'content_type': contentType,
+    'call_id': callId,
     'protocol': {
       'headers': {
-        'Fn_call_id': ['1'],
-        'Content-Type': ['application/json']
+        'Content-Type': [contentType]
       }
     }
   }
-  const expectedOutputContentType = request.protocol.headers['Content-Type'][0]
-  const expectedOutputPayload = payload + request.protocol.headers['Fn_call_id'][0]
+  const expectedOutputContentType = contentType
+  const expectedOutputPayload = payload + callId
   const expectedJSONResponse = buildJSONResponse(expectedOutputPayload, expectedOutputContentType)
 
-  fdk.__set__({
-                process: {
-                  env: {'FN_FORMAT': 'json'},
-                  stderr: new MockStdOutput(function (data) {
-                    process.stderr.write(data)
-                  }),
-                  stdin: new MockStdin(JSON.stringify(request)),
-                  stdout: new MockStdOutput(function (chunk) {
-                    var response = JSON.parse(chunk)
-                    t.deepEqual(response, expectedJSONResponse)
-                    t.end()
-                  })
-                }
-              })
+  fdk.__set__(
+    {
+      process: {
+        env: {'FN_FORMAT': 'json'},
+        stderr: new MockStdOutput(function (data) {
+          process.stderr.write(data)
+        }),
+        stdin: new MockStdin(JSON.stringify(request)),
+        stdout: new MockStdOutput(function (chunk) {
+          let response = JSON.parse(chunk)
+          t.deepEqual(response, expectedJSONResponse)
+          t.end()
+        })
+      }
+    })
 
   fdk.handle(function (body, ctx) {
     t.equal(body, payload) // parsed JSON
-    return body + ctx.call_id
+    return body + ctx.callId
   })
 })
 
@@ -467,19 +519,20 @@ test('JSON format function exception', function (t) {
   const expectedOutputContentType = 'application/text'
   const expectedJSONResponse = buildJSONErrorResponse(expectedBody, expectedOutputContentType)
 
-  fdk.__set__({
-                process: {
-                  env: {'FN_FORMAT': 'json'},
-                  stderr: new MockStdOutput(function () {
-                  }),
-                  stdin: new MockStdin(JSON.stringify(request)),
-                  stdout: new MockStdOutput(function (chunk) {
-                    var response = JSON.parse(chunk)
-                    t.deepEqual(expectedJSONResponse, response)
-                    t.end()
-                  })
-                }
-              })
+  fdk.__set__(
+    {
+      process: {
+        env: {'FN_FORMAT': 'json'},
+        stderr: new MockStdOutput(function () {
+        }),
+        stdin: new MockStdin(JSON.stringify(request)),
+        stdout: new MockStdOutput(function (chunk) {
+          var response = JSON.parse(chunk)
+          t.deepEqual(expectedJSONResponse, response)
+          t.end()
+        })
+      }
+    })
 
   fdk.handle(function (body, ctx) {
     throw new Error('fail on purpose')
@@ -552,7 +605,8 @@ function buildJSONResponse (payload, contentType) {
     body: JSON.stringify(payload),
     content_type: contentType,
     protocol: {
-      status_code: 200
+      status_code: 200,
+      headers: {}
     }
   }
 }

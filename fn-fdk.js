@@ -45,7 +45,7 @@ function handleDefault (fnfunction) {
     process.stdout = process.stderr
 
     let ctxout = {content_type: 'application/json'}
-    let ctx = new DefaultContext(process.env, ctxout)
+    let ctx = new DefaultContext(input, process.env, ctxout)
 
     new Promise(function (resolve, reject) {
       resolve(fnfunction(extractRequestBody(ctx.contentType, input), ctx))
@@ -98,20 +98,21 @@ function handleJSON (fnfunction) {
     let outCtx = {content_type: request.content_type}
     let httpOutCtx = {status_code: 200, headers: {}}
 
+    console.log('Got JSON body', request)
     let ctx = new JSONContext(process.env, request, outCtx, httpOutCtx)
 
     new Promise(function (resolve, reject) {
       let input
       try {
-        input = extractRequestBody(ctx.content_type, request.body)
+        input = extractRequestBody(ctx.contentType, request.body)
       } catch (error) {
         reject(error)
       }
-      resolve(fnfunction(input, ctx))
+      return resolve(fnfunction(input, ctx))
     }).then(function (result) {
-      realStdout.write(buildJSONResponse(result, ctx, httpOutCtx))
+      realStdout.write(buildJSONResponse(result, outCtx, httpOutCtx))
     }, function (error) {
-      realStdout.write(buildJSONError(error, ctx))
+      realStdout.write(buildJSONError(error))
     })
   }
 }
@@ -127,24 +128,26 @@ function convertResult (result, contextout) {
 function buildJSONResponse (result, contextout, protoout) {
   let body = convertResult(result, contextout)
 
-  return JSON.stringify({
-                          body: body,
-                          content_type: contextout.content_type,
-                          protocol: {
-                            status_code: protoout.status_code,
-                            headers: protoout.headers
-                          }
-                        })
+  return JSON.stringify(
+    {
+      body: body,
+      content_type: contextout.content_type,
+      protocol: {
+        status_code: protoout.status_code,
+        headers: protoout.headers
+      }
+    })
 }
 
 // TODO: confirm structure of error response
 function buildJSONError (error) {
   console.log('Error in function:', error)
-  return JSON.stringify({
-                          body: fnFunctionExceptionMessage,
-                          content_type: 'application/text',
-                          protocol: {
-                            status_code: 500
-                          }
-                        })
+  return JSON.stringify(
+    {
+      body: fnFunctionExceptionMessage,
+      content_type: 'application/text',
+      protocol: {
+        status_code: 500
+      }
+    })
 }
