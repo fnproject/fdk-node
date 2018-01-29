@@ -4,7 +4,6 @@ const test = require('tape')
 const rewire = require('rewire')
 const {MockStdOutput} = require('./mocks.js')
 const {MockStdin} = require('./mocks.js')
-const {MockFs} = require('./mocks.js')
 
 /**
  *  Handler Dispatch tests
@@ -143,12 +142,9 @@ test('default non-FN env var', function (t) {
 
   fdk.__set__(
     {
-      fs: new MockFs(t, '/dev/stdin', ''),
       process: {
         env: envVars,
-        stdin: new MockStdin(function () {
-          t.fail('stdin read')
-        }),
+        stdin: new MockStdin(''),
         stdout: new MockStdOutput(function () {
         }),
         stderr: new MockStdOutput(function () {
@@ -161,6 +157,7 @@ test('default non-FN env var', function (t) {
     })
 
   fdk.handle(function (body, ctx) {
+    t.equal(body, '', 'body should be empty string')
     t.equal(ctx.getConfig(envKey), envValue, envKey + ' env var value')
     return ''
   })
@@ -170,14 +167,14 @@ test('default function invocation with context', function (t) {
   let fdk = rewire('../fn-fdk.js')
   const inputMessage = 'testbody'
 
+  const callId = '_call_id_'
   fdk.__set__(
     {
-      fs: new MockFs(t, '/dev/stdin', inputMessage),
       process: {
-        env: {},
-        stdin: new MockStdin(function () {
-          t.fail('stdin read')
-        }),
+        env: {
+          FN_CALL_ID: callId
+        },
+        stdin: new MockStdin(inputMessage),
         stdout: new MockStdOutput(function () {
         }),
         stderr: new MockStdOutput(function () {
@@ -191,8 +188,8 @@ test('default function invocation with context', function (t) {
 
   fdk.handle(function (body, ctx) {
     // function delares both body and optional context
-    t.assert(body, 'fn function invoked with body')
-    t.assert(ctx, 'fn function invoked with context')
+    t.equal(body, inputMessage, 'fn function invoked with body')
+    t.equal(ctx.callId, callId, 'fn function invoked with context')
     return ''
   })
 })
@@ -203,12 +200,9 @@ test('default function invocation no context', function (t) {
 
   fdk.__set__(
     {
-      fs: new MockFs(t, '/dev/stdin', inputMessage),
       process: {
         env: {},
-        stdin: new MockStdin(function () {
-          t.fail('stdin read')
-        }),
+        stdin: new MockStdin(inputMessage),
         stdout: new MockStdOutput(function () {
         }),
         stderr: new MockStdOutput(function () {
@@ -233,12 +227,9 @@ test('default function string from stdin', function (t) {
 
   fdk.__set__(
     {
-      fs: new MockFs(t, '/dev/stdin', inputMessage),
       process: {
         env: {},
-        stdin: new MockStdin(function () {
-          t.fail('stdin read')
-        }),
+        stdin: new MockStdin(inputMessage),
         stdout: new MockStdOutput(function () {
         }),
         stderr: new MockStdOutput(function (outputMessage) {
@@ -264,12 +255,9 @@ test('default function json body from stdin', function (t) {
 
   fdk.__set__(
     {
-      fs: new MockFs(t, '/dev/stdin', inputMessage),
       process: {
         env: {'FN_HEADER_CONTENT_TYPE': 'application/json'},
-        stdin: new MockStdin(function () {
-          t.fail('stdin read')
-        }),
+        stdin: new MockStdin(inputMessage),
         stdout: new MockStdOutput(function () {
         }),
         stderr: new MockStdOutput(function (outputMessage) {
@@ -389,7 +377,7 @@ test('JSON function invocation with context', function (t) {
   })
 })
 
-test('JSON function invocation with non-JSON content', function (t) {
+test('JSON function invocation with non-JSON input', function (t) {
   let fdk = rewire('../fn-fdk.js')
   const payload = 'Jane'
   const callId = '01C433NT3V47WGA00000000000'
@@ -412,7 +400,8 @@ test('JSON function invocation with non-JSON content', function (t) {
         stderr: new MockStdOutput(function () {
         }),
         stdin: new MockStdin(JSON.stringify(request)),
-        stdout: new MockStdOutput(function () {
+        stdout: new MockStdOutput(function (chunk) {
+
         })
       }
     })
@@ -422,6 +411,43 @@ test('JSON function invocation with non-JSON content', function (t) {
     t.equal(ctx.callId, callId, 'call_id context value')
     t.end()
     return ''
+  })
+})
+
+test('JSON function invocation with non-JSON output', function (t) {
+  let fdk = rewire('../fn-fdk.js')
+  const request = {
+    'body': JSON.stringify('Jane'),
+    'content_type': 'application/json',
+    'call_id': '01C433NT3V47WGA00000000000',
+    'protocol': {
+      'request_url': 'http://a.proto/r/path',
+      'headers': {
+        'Content-Type': ['application/json']
+      }
+    }
+  }
+
+  const expectedResponse = 'Hello Folks'
+  const responseContentType = 'text/plain'
+  const expectedResponseBody = buildJSONResponse(expectedResponse, responseContentType)
+  fdk.__set__(
+    {
+      process: {
+        env: {'FN_FORMAT': 'json'},
+        stderr: new MockStdOutput(function () {
+        }),
+        stdin: new MockStdin(JSON.stringify(request)),
+        stdout: new MockStdOutput(function (chunk) {
+          t.deepEqual(JSON.parse(chunk), expectedResponseBody)
+          t.end()
+        })
+      }
+    })
+
+  fdk.handle(function (body, ctx) {
+    ctx.responseContentType = 'text/plain'
+    return expectedResponse
   })
 })
 
@@ -453,10 +479,9 @@ test('JSON function invocation no context', function (t) {
   fdk.handle(function (body) {
     // function does not declare context param
     t.equal(body, payload, 'fn function invoked with body')
+    t.end()
     return ''
   })
-
-  t.end()
 })
 
 test('JSON function body and response', function (t) {
@@ -476,9 +501,8 @@ test('JSON function body and response', function (t) {
       }
     }
   }
-  const expectedOutputContentType = contentType
   const expectedOutputPayload = payload + callId
-  const expectedJSONResponse = buildJSONResponse(expectedOutputPayload, expectedOutputContentType)
+  const expectedJSONResponse = buildJSONResponseWithJSONBody(expectedOutputPayload)
 
   fdk.__set__(
     {
@@ -516,7 +540,7 @@ test('JSON format function exception', function (t) {
   }
   // FDK error message constant
   const expectedBody = fdk.__get__('fnFunctionExceptionMessage')
-  const expectedOutputContentType = 'application/text'
+  const expectedOutputContentType = 'text/plain'
   const expectedJSONResponse = buildJSONErrorResponse(expectedBody, expectedOutputContentType)
 
   fdk.__set__(
@@ -535,7 +559,232 @@ test('JSON format function exception', function (t) {
     })
 
   fdk.handle(function (body, ctx) {
-    throw new Error('fail on purpose')
+    throw new Error('intentional error')
+  })
+})
+
+test('JSON Write to stdout does not pollute protocol', function (t) {
+  let fdk = rewire('../fn-fdk.js')
+  const request = {
+    'body': JSON.stringify('Jane'),
+    'content_type': 'application/json',
+    'call_id': '01C433NT3V47WGA00000000000',
+    'protocol': {
+      'request_url': 'http://a.proto/r/path',
+      'headers': {
+        'Content-Type': ['application/json']
+      }
+    }
+  }
+
+  const expectedBody = 'Result'
+  const expectedJSONResponse = buildJSONResponseWithJSONBody(expectedBody)
+
+  fdk.__set__(
+    {
+      process: {
+        env: {'FN_FORMAT': 'json'},
+        stderr: new MockStdOutput(function () {
+        }),
+        stdin: new MockStdin(JSON.stringify(request)),
+        stdout: new MockStdOutput(function (chunk) {
+          var response = JSON.parse(chunk)
+          t.deepEqual(expectedJSONResponse, response)
+          t.end()
+        })
+      }
+    })
+
+  fdk.handle(function (body, ctx) {
+    process.stdout.write('Hello World')
+    return expectedBody
+  })
+})
+
+test('JSON function handles multiple events', function (t) {
+  let fdk = rewire('../fn-fdk.js')
+  const request1 = {
+    'body': JSON.stringify(0),
+    'content_type': 'application/json',
+    'call_id': '1',
+    'protocol': {
+      'request_url': 'http://a.proto/r/path',
+      'headers': {
+        'Content-Type': ['application/json']
+      }
+    }
+  }
+  const request2 = {
+    'body': JSON.stringify(1),
+    'content_type': 'application/json',
+    'call_id': '1',
+    'protocol': {
+      'request_url': 'http://a.proto/r/path',
+      'headers': {
+        'Content-Type': ['application/json']
+      }
+    }
+  }
+
+  let respCount = 0
+  fdk.__set__(
+    {
+      process: {
+        env: {'FN_FORMAT': 'json'},
+        stderr: new MockStdOutput(function () {
+        }),
+        stdin: new MockStdin(JSON.stringify(request1) + '\n' + JSON.stringify(request2)),
+        stdout: new MockStdOutput(function (chunk) {
+          let response = JSON.parse(chunk)
+          t.deepEqual(response, buildJSONResponseWithJSONBody(respCount))
+          respCount++
+          if (respCount === 1) {
+            t.end()
+          }
+        })
+      }
+    })
+
+  fdk.handle(function (body, ctx) {
+    return body
+  })
+})
+
+test('JSON function Handles valid promise', function (t) {
+  let fdk = rewire('../fn-fdk.js')
+  const request = {
+    'body': JSON.stringify(''),
+    'content_type': 'application/json',
+    'call_id': '01C433NT3V47WGA00000000000',
+    'protocol': {
+      'request_url': 'http://a.proto/r/path',
+      'headers': {
+        'Content-Type': ['application/json']
+      }
+    }
+  }
+
+  const expectedBody = 'Result'
+  const expectedJSONResponse = buildJSONResponseWithJSONBody(expectedBody)
+
+  fdk.__set__(
+    {
+      process: {
+        env: {'FN_FORMAT': 'json'},
+        stderr: new MockStdOutput(function () {
+        }),
+        stdin: new MockStdin(JSON.stringify(request)),
+        stdout: new MockStdOutput(function (chunk) {
+          let response = JSON.parse(chunk)
+          t.deepEqual(response, expectedJSONResponse)
+          t.end()
+        })
+      }
+    })
+
+  fdk.handle(function (body, ctx) {
+    return new Promise(function (resolve, reject) {
+      setTimeout(() => resolve(expectedBody), 10)
+    })
+  })
+})
+
+test('JSON function Handles rejected promise ', function (t) {
+  let fdk = rewire('../fn-fdk.js')
+  const request = {
+    'body': JSON.stringify(''),
+    'content_type': 'application/json',
+    'call_id': '01C433NT3V47WGA00000000000',
+    'protocol': {
+      'request_url': 'http://a.proto/r/path',
+      'headers': {
+        'Content-Type': ['application/json']
+      }
+    }
+  }
+
+  const expectedJSONResponse = buildJSONErrorResponse(fdk.__get__('fnFunctionExceptionMessage'),
+                                                      'text/plain')
+
+  fdk.__set__(
+    {
+      process: {
+        env: {'FN_FORMAT': 'json'},
+        stderr: new MockStdOutput(function () {
+        }),
+        stdin: new MockStdin(JSON.stringify(request)),
+        stdout: new MockStdOutput(function (chunk) {
+          let response = JSON.parse(chunk)
+          t.deepEqual(response, expectedJSONResponse)
+          t.end()
+        })
+      }
+    })
+
+  fdk.handle(function (body, ctx) {
+    return new Promise(function (resolve, reject) {
+      setTimeout(() => reject(new Error('intentional error')), 10)
+    })
+  })
+})
+
+test('Default function Handles valid promise', function (t) {
+  let fdk = rewire('../fn-fdk.js')
+  const envVars = {
+    'FN_FORMAT': 'default'
+  }
+  const expectedBody = 'Result'
+  fdk.__set__(
+    {
+      process: {
+        env: envVars,
+        stderr: new MockStdOutput(function () {
+        }),
+        stdin: new MockStdin(''),
+        stdout: new MockStdOutput(function (chunk) {
+          t.equal(chunk, expectedBody)
+        }),
+        exit: function (code) {
+          t.equal(code, 0)
+          t.end()
+        }
+      }
+    })
+
+  fdk.handle(function (body, ctx) {
+    console.log('called default fn')
+
+    return new Promise(function (resolve, reject) {
+      setTimeout(() => resolve(expectedBody), 10)
+    })
+  })
+})
+
+test('Default function Handles rejected promise ', function (t) {
+  let fdk = rewire('../fn-fdk.js')
+
+  const expectedBody = fdk.__get__('fnFunctionExceptionMessage')
+  fdk.__set__(
+    {
+      process: {
+        env: {'FN_FORMAT': 'default'},
+        stderr: new MockStdOutput(function () {
+        }),
+        stdin: new MockStdin(''),
+        stdout: new MockStdOutput(function (chunk) {
+          t.equal(chunk, expectedBody)
+        }),
+        exit: function (code) {
+          t.equal(code, 1)
+          t.end()
+        }
+      }
+    })
+
+  fdk.handle(function (body, ctx) {
+    return new Promise(function (resolve, reject) {
+      setTimeout(() => reject(new Error('intentional error')), 10)
+    })
   })
 })
 
@@ -602,13 +851,17 @@ test('JSON format function exception', function (t) {
 
 function buildJSONResponse (payload, contentType) {
   return {
-    body: JSON.stringify(payload),
+    body: payload,
     content_type: contentType,
     protocol: {
       status_code: 200,
       headers: {}
     }
   }
+}
+
+function buildJSONResponseWithJSONBody (payload) {
+  return buildJSONResponse(JSON.stringify(payload), 'application/json')
 }
 
 function buildJSONErrorResponse (errorMessage, contentType) {

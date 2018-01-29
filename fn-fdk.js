@@ -4,7 +4,6 @@
 */
 
 const JSONParser = require('jsonparse')
-const fs = require('fs')
 const {DefaultContext, JSONContext} = require('./lib/context.js')
 const fnFunctionExceptionMessage = 'Exception in function--consult logs for details'
 
@@ -22,40 +21,61 @@ exports.handle = function (fnfunction) {
       fdkHandler = handleDefault
       break
     default:
-      console.log('Unsupported format ' + fnFormat)
+      console.warn(
+        `The Node.js FDK does not support the '${fnFormat}' format, change the function format to 'json' or 'default'. Exiting')`)
       process.exit(2)
   }
 
-  // TODO: handle async
   fdkHandler(fnfunction)
 }
 
 function extractRequestBody (contentType, body) {
   if (contentType.toLowerCase().startsWith('application/json')) {
-    console.debug(`Parsing JSON body: '${body}'`)
     return JSON.parse(body)
   }
   return body
 }
 
-function handleDefault (fnfunction) {
+function handleDefault (fnFunction) {
   try {
-    let input = fs.readFileSync('/dev/stdin').toString()
+    let len = 0
+    let chunks = []
+
+    process.stdin.on('readable', () => {
+      let chunk
+
+      while ((chunk = process.stdin.read())) {
+        chunks.push(chunk)
+        len += chunk.length
+      }
+    })
+
     let realStdout = process.stdout
     process.stdout = process.stderr
 
-    let ctxout = {content_type: 'application/json'}
-    let ctx = new DefaultContext(input, process.env, ctxout)
+    process.stdin.on('end', () => {
+      let input = Buffer.concat(chunks, len).toString()
 
-    new Promise(function (resolve, reject) {
-      resolve(fnfunction(extractRequestBody(ctx.contentType, input), ctx))
-    }).then(function handleSuccess (data) {
-      realStdout.write(convertResult(data, ctxout))
-      process.exit(0)
-    }, function handleError (error) {
-      console.log('error in function ', error)
-      realStdout.write(fnFunctionExceptionMessage)
-      process.exit(1)
+      let outCtx = {content_type: ''}
+
+      let ctx = new DefaultContext(input, process.env, outCtx)
+      outCtx.content_type = ctx.contentType
+
+      new Promise(function (resolve, reject) {
+        try {
+          input = extractRequestBody(ctx.contentType, input)
+        } catch (error) {
+          reject(error)
+        }
+        return resolve(fnFunction(input, ctx))
+      }).then(function (result) {
+        realStdout.write(convertResult(result, outCtx))
+        process.exit(0)
+      }, function (error) {
+        console.warn('Error in function: ', error)
+        realStdout.write(fnFunctionExceptionMessage)
+        process.exit(1)
+      })
     })
   } catch (e) {
     process.stderr.write(e.message)
@@ -86,7 +106,7 @@ function handleJSON (fnfunction) {
   })
 
   parser.onError = function (error) {
-    console.log('Invalid JSON input event, exiting', error)
+    console.warn('Invalid JSON input event, exiting', error)
     realStdout.write(buildJSONError(error))
     process.exit(1)
   }
@@ -98,7 +118,6 @@ function handleJSON (fnfunction) {
     let outCtx = {content_type: request.content_type}
     let httpOutCtx = {status_code: 200, headers: {}}
 
-    console.log('Got JSON body', request)
     let ctx = new JSONContext(process.env, request, outCtx, httpOutCtx)
 
     new Promise(function (resolve, reject) {
@@ -112,7 +131,9 @@ function handleJSON (fnfunction) {
     }).then(function (result) {
       realStdout.write(buildJSONResponse(result, outCtx, httpOutCtx))
     }, function (error) {
-      realStdout.write(buildJSONError(error))
+
+      console.warn("Error in function:",error)
+      realStdout.write(buildJSONError(fnFunctionExceptionMessage))
     })
   }
 }
@@ -139,13 +160,11 @@ function buildJSONResponse (result, contextout, protoout) {
     })
 }
 
-// TODO: confirm structure of error response
 function buildJSONError (error) {
-  console.log('Error in function:', error)
   return JSON.stringify(
     {
       body: fnFunctionExceptionMessage,
-      content_type: 'application/text',
+      content_type: 'text/plain',
       protocol: {
         status_code: 500
       }
