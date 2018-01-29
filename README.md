@@ -179,10 +179,10 @@ fdk.handle(function(input, ctx){
 
 By default the FDK will convert input with a content-type matching `application/json` into a JSON object as the function input, if the incoming content type is different from `application/json` then the input will be the raw string value of the input. In both cases,  the raw (string) version of the input is also available in `ctx.body`. 
 
-Likewise by default the output of a function will be treated as a JSON object and converted using JSON.stringify - you can change this behaviour by setting the content type of the response in the context using `ctx.responseContentType='application/text-plain'. Changing the content type to non-json will result in the output being treated as a string.  
+Likewise by default the output of a function will be treated as a JSON object and converted using JSON.stringify - you can change this behaviour by setting the content type of the response in the context using `ctx.responseContentType='application/text-plain'`. Changing the content type to non-json will result in the output being treated as a string.  
 
 # Using  HTTP headers and setting HTTP status codes
-You can read http headers passed into a function invocation using `ctx.protocol.header(key)`, this returns the first header value of the header matching `key` (after canonicalization)  and `ctx.protocol.headers` which an object containing all headers.  
+You can read http headers passed into a function invocation using `ctx.protocol.header(key)`, this returns the first header value of the header matching `key` (after canonicalization)  and `ctx.protocol.headers` which returns an object containing all headers.  
 
 ```javascript
 var fdk=require('fn-fdk');
