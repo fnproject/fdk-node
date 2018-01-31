@@ -41,6 +41,10 @@ function handleDefault (fnFunction) {
     let len = 0
     let chunks = []
 
+    process.beforeExit= ()=>{
+      console.log("Before exit")
+    }
+
     process.stdin.on('readable', () => {
       let chunk
 
@@ -86,6 +90,10 @@ function handleDefault (fnFunction) {
 function handleJSON (fnfunction) {
   let parser = new JSONParser()
 
+  process.beforeExit = ()=>{
+    console.log("Before exit")
+  }
+
   let realStdout = process.stdout
   process.stdout = process.stderr
 
@@ -107,7 +115,7 @@ function handleJSON (fnfunction) {
 
   parser.onError = function (error) {
     console.warn('Invalid JSON input event, exiting', error)
-    realStdout.write(buildJSONError(error))
+    realStdout.write(buildJSONError())
     process.exit(1)
   }
 
@@ -133,7 +141,7 @@ function handleJSON (fnfunction) {
     }, function (error) {
 
       console.warn("Error in function:",error)
-      realStdout.write(buildJSONError(fnFunctionExceptionMessage))
+      realStdout.write(buildJSONError())
     })
   }
 }
@@ -160,7 +168,7 @@ function buildJSONResponse (result, contextout, protoout) {
     })
 }
 
-function buildJSONError (error) {
+function buildJSONError () {
   return JSON.stringify(
     {
       body: fnFunctionExceptionMessage,

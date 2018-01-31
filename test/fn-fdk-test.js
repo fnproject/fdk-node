@@ -102,7 +102,7 @@ test('build default context', function (t) {
     'FN_FORMAT': fnformat,
     'FN_PATH': fnpath,
     'FN_MEMORY': fnmemory,
-    'FN_HEADER_Fn_deadline': fndeadline,
+    'FN_DEADLINE': fndeadline,
     'FN_METHOD': fnmethod,
     'FN_HEADER_User-Agent': useragentheader,
     'FN_REQUEST_URL': fnrequesturl,
@@ -305,12 +305,14 @@ test('build JSON context', function (t) {
   const request = {
     'call_id': callId,
     'content_type': contentType,
+    'type' : fntype,
+    'deadline': deadline,
     'protocol': {
-      'type': 'sync',
+      'type': 'http',
+      'method': method,
       'request_url': requestUrl,
       'headers': {
-        'Fn_deadline': [deadline],
-        'Fn_method': [method],
+        'Fn-foo' : ['bar'],
         'Content-Type': [contentType],
         'MY_HEADER': [myheaderval]
       }
@@ -333,7 +335,8 @@ test('build JSON context', function (t) {
   t.equal(ctx.protocol.method, method, 'method')
   t.deepEqual(ctx.protocol.headers, {
     'Content-Type': [contentType],
-    'My-Header': [myheaderval]
+    'My-Header': [myheaderval],
+    'Fn-Foo' : ['bar'],
   }, 'headers')
 
   t.end()
