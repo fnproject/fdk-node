@@ -156,7 +156,7 @@ function buildJSONResponse (result, contextout, protoout) {
         status_code: protoout.status_code,
         headers: protoout.headers
       }
-    })
+    })+ "\n"
 }
 
 function buildJSONError () {
@@ -167,5 +167,5 @@ function buildJSONError () {
       protocol: {
         status_code: 500
       }
-    })
+    })+ "\n"
 }

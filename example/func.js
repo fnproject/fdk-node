@@ -1,5 +1,5 @@
-const fdk = require('@floatydog/fn-fdk')
+const fdk = require('@fnproject/fdk')
 
 fdk.handle(function (input, ctx) {
-  return 'Hello' + JSON.stringify(input)
+  return 'Hello ' + JSON.stringify(input)
 })
