@@ -1,0 +1,4 @@
+name: nodefn
+version: 0.0.5
+runtime: node
+entrypoint: node func.js

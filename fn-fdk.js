@@ -41,10 +41,6 @@ function handleDefault (fnFunction) {
     let len = 0
     let chunks = []
 
-    process.beforeExit= ()=>{
-      console.log("Before exit")
-    }
-
     process.stdin.on('readable', () => {
       let chunk
 
@@ -55,7 +51,7 @@ function handleDefault (fnFunction) {
     })
 
     let realStdout = process.stdout
-    process.stdout = process.stderr
+    process.stdout.write = process.stderr.write
 
     process.stdin.on('end', () => {
       let input = Buffer.concat(chunks, len).toString()
@@ -90,12 +86,8 @@ function handleDefault (fnFunction) {
 function handleJSON (fnfunction) {
   let parser = new JSONParser()
 
-  process.beforeExit = ()=>{
-    console.log("Before exit")
-  }
-
   let realStdout = process.stdout
-  process.stdout = process.stderr
+  process.stdout.write = process.stderr.write
 
   parser._push = parser.push
   parser._pop = parser.pop
@@ -139,8 +131,7 @@ function handleJSON (fnfunction) {
     }).then(function (result) {
       realStdout.write(buildJSONResponse(result, outCtx, httpOutCtx))
     }, function (error) {
-
-      console.warn("Error in function:",error)
+      console.warn('Error in function:', error)
       realStdout.write(buildJSONError())
     })
   }

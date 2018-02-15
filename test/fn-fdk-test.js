@@ -305,14 +305,14 @@ test('build JSON context', function (t) {
   const request = {
     'call_id': callId,
     'content_type': contentType,
-    'type' : fntype,
+    'type': fntype,
     'deadline': deadline,
     'protocol': {
       'type': 'http',
       'method': method,
       'request_url': requestUrl,
       'headers': {
-        'Fn-foo' : ['bar'],
+        'Fn-foo': ['bar'],
         'Content-Type': [contentType],
         'MY_HEADER': [myheaderval]
       }
@@ -336,7 +336,7 @@ test('build JSON context', function (t) {
   t.deepEqual(ctx.protocol.headers, {
     'Content-Type': [contentType],
     'My-Header': [myheaderval],
-    'Fn-Foo' : ['bar'],
+    'Fn-Foo': ['bar']
   }, 'headers')
 
   t.end()
