@@ -6,6 +6,6 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "@fnproject/fdk": "0.0.1"
+    "@fnproject/fdk": "0.x"
   }
 }
