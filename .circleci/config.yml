@@ -22,11 +22,11 @@ jobs:
       #     curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
       #     sudo apt-get install -y nodejs
       # - run: node -v
-      
+
       # TODO: run npm test
       - deploy:
           command: |
-            if [[ "${CIRCLE_BRANCH}" == "circle" && -z "${CIRCLE_PR_REPONAME}" ]]; then
+            if [[ "${CIRCLE_BRANCH}" == "master" && -z "${CIRCLE_PR_REPONAME}" ]]; then
               # todo: login to npm
               git config --global user.email "ci@fnproject.com"
               git config --global user.name "CI"
