@@ -1,16 +1,16 @@
 set -ex
 
 # ensure working dir is clean
-# git status
-# if [[ -z $(git status -s) ]]
-# then
-#   echo "tree is clean"
-# else
-#   echo "tree is dirty, please commit changes before running this"
-#   exit 1
-# fi
+git status
+if [[ -z $(git status -s) ]]
+then
+  echo "tree is clean"
+else
+  echo "tree is dirty, please commit changes before running this"
+  exit 1
+fi
 
-# git pull
+git pull
 
 version_file="package.json"
 # Bump version, patch by default - also checks if previous commit message contains `[bump X]`, and if so, bumps the appropriate semver number - https://github.com/treeder/dockers/tree/master/bump
