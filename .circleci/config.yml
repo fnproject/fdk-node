@@ -13,10 +13,10 @@ jobs:
             npm --version
       - checkout
       # install node
-      - run: |
-          curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
-          sudo apt-get install -y nodejs
-      - run: node -v
+      # - run: |
+      #     curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+      #     sudo apt-get install -y nodejs
+      # - run: node -v
       - deploy:
           command: |
             if [[ "${CIRCLE_BRANCH}" == "circle" && -z "${CIRCLE_PR_REPONAME}" ]]; then
