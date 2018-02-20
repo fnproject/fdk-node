@@ -1,6 +1,6 @@
 {
   "name": "@fnproject/fdk",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Function Developer Kit for Fn",
   "main": "fn-fdk.js",
   "scripts": {
@@ -14,7 +14,7 @@
   "contributors": [
 	  {
 		  "name":"Owen Cliffe",
-	  	  "email": "owen.cliffe@oracle.com"
+	  	"email": "owen.cliffe@oracle.com"
 	  }
   ],
   "license": "Apache-2.0",
