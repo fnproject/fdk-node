@@ -26,4 +26,5 @@ git tag -f -a $tag -m "version $version"
 git push
 git push origin $tag
 
-npm publish
+# Note, this requires a local .npmrc. eg: echo $NPM_TOKEN > .npmrc
+docker run --rm -it -v $PWD:/mypkg -w /mypkg node:9-alpine npm publish

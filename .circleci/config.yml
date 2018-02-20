@@ -1,16 +1,21 @@
 version: 2
 jobs:
   build:
-    # machine: true
-    # working_directory: ~/go/src/github.com/fnproject/fdk-node
-    docker:
-      - image: node:9
+    machine: true
+    working_directory: ~/go/src/github.com/fnproject/fdk-node
+    # docker:
+    #   - image: node:9
     steps:
       - run:
           name: "Checking Versions"
           command: |
             node --version
             npm --version
+      - run:
+        name: "Upgrading node"
+        command: |
+        curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+        sudo apt-get install -y nodejs
       - checkout
       # install node
       # - run: |
@@ -24,5 +29,7 @@ jobs:
               git config --global user.email "ci@fnproject.com"
               git config --global user.name "CI"
               git branch --set-upstream-to=origin/${CIRCLE_BRANCH} ${CIRCLE_BRANCH}
+              echo $NPM_TOKEN > .npmrc
               ./release.sh
+              rm -f .npmrc
             fi
