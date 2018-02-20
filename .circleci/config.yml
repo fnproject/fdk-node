@@ -4,7 +4,7 @@ jobs:
     # machine: true
     # working_directory: ~/go/src/github.com/fnproject/fdk-node
     docker:
-      - image: node 9.0
+      - image: node 8.0
     steps:
       - run:
           name: "Checking Versions"
