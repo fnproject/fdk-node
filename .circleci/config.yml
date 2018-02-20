@@ -16,3 +16,4 @@ jobs:
               # todo: login to npm
               ./release.sh
             fi
+            
