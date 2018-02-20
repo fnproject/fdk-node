@@ -10,12 +10,14 @@
     "type": "git",
     "url": "https://github.com/fnproject/fdk-node.git"
   },
-  "author": {"name":"Shaun Smith"},
+  "author": {
+    "name": "Shaun Smith"
+  },
   "contributors": [
-	  {
-		  "name":"Owen Cliffe",
-	  	"email": "owen.cliffe@oracle.com"
-	  }
+    {
+      "name": "Owen Cliffe",
+      "email": "owen.cliffe@oracle.com"
+    }
   ],
   "license": "Apache-2.0",
   "dependencies": {

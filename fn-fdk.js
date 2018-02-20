@@ -32,8 +32,8 @@ exports.handle = function (fnfunction) {
 function extractRequestBody (contentType, body) {
   // console.error("CT:", contentType, "BODY:", body)
   if (contentType.toLowerCase().startsWith('application/json')) {
-    if (body == "") {
-      body = "{}" // don't break parser on no input
+    if (body === '') {
+      body = '{}' // don't break parser on no input
     }
     return JSON.parse(body)
   }

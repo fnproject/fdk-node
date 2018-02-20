@@ -11,17 +11,19 @@ jobs:
           command: |
             node --version
             npm --version
-      - run:
-        name: "Upgrading node"
-        command: |
-        curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
-        sudo apt-get install -y nodejs
+      # - run:
+      #   name: "Upgrading node"
+      #   command: |
+      #   curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+      #   sudo apt-get install -y nodejs
       - checkout
       # install node
       # - run: |
       #     curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
       #     sudo apt-get install -y nodejs
       # - run: node -v
+      
+      # TODO: run npm test
       - deploy:
           command: |
             if [[ "${CIRCLE_BRANCH}" == "circle" && -z "${CIRCLE_PR_REPONAME}" ]]; then
