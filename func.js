@@ -1,4 +1,5 @@
-// please leave here in root, makes for easy testing, can just do `fn run`
+// please leave here in root, makes for easy testing, can just do ` echo '{"name":"travis"}' | fn run | jq .message`
+
 const fdk = require('./fn-fdk.js')
 
 fdk.handle(function(input, ctx) {

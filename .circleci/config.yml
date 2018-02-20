@@ -1,0 +1,18 @@
+version: 2
+jobs:
+  build:
+    machine: true
+    working_directory: ~/go/src/github.com/fnproject/fdk-node
+    steps:
+      - checkout
+      # install node
+      - run: |
+          curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+      - run: node -v
+      - deploy:
+          command: |
+            if [[ "${CIRCLE_BRANCH}" == "circle" && -z "${CIRCLE_PR_REPONAME}" ]]; then
+              # todo: login to npm
+              ./release.sh
+            fi
