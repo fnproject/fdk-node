@@ -3,3 +3,4 @@ launch.json
 .iml
 example/node_modules
 node_modules
+.npmrc

@@ -1,6 +1,6 @@
 {
   "name": "@fnproject/fdk",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "description": "Function Developer Kit for Fn",
   "main": "fn-fdk.js",
   "scripts": {
@@ -10,12 +10,14 @@
     "type": "git",
     "url": "https://github.com/fnproject/fdk-node.git"
   },
-  "author": {"name":"Shaun Smith"},
+  "author": {
+    "name": "Shaun Smith"
+  },
   "contributors": [
-	  {
-		  "name":"Owen Cliffe",
-	  	  "email": "owen.cliffe@oracle.com"
-	  }
+    {
+      "name": "Owen Cliffe",
+      "email": "owen.cliffe@oracle.com"
+    }
   ],
   "license": "Apache-2.0",
   "dependencies": {
