@@ -150,8 +150,8 @@ function convertResult (result, contextout) {
 }
 
 function buildJSONResponse (result, contextout, protoout) {
-  let body = convertResult(result, contextout)
-
+  let body = result !== null ? JSON.stringify(result) : ''
+  
   return JSON.stringify(
     {
       body: body,
