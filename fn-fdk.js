@@ -60,7 +60,7 @@ function handleDefault (fnFunction) {
     process.stdin.on('end', () => {
       let input = Buffer.concat(chunks, len).toString()
 
-      let outCtx = {content_type: ''}
+      let outCtx = {content_type: 'application/json'}
 
       let ctx = new DefaultContext(input, process.env, outCtx)
       outCtx.content_type = ctx.contentType
@@ -119,7 +119,7 @@ function handleJSON (fnfunction) {
     if (depth !== 0) {
       return
     }
-    let outCtx = {content_type: request.content_type}
+    let outCtx = {content_type: 'application/json'}
     let httpOutCtx = {status_code: 200, headers: {}}
 
     let ctx = new JSONContext(process.env, request, outCtx, httpOutCtx)
@@ -150,7 +150,7 @@ function convertResult (result, contextout) {
 }
 
 function buildJSONResponse (result, contextout, protoout) {
-  let body = result !== null ? JSON.stringify(result) : ''
+  let body = convertResult(result, contextout)
 
   return JSON.stringify(
     {
