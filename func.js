@@ -2,11 +2,11 @@
 
 const fdk = require('./fn-fdk.js')
 
-fdk.handle(function(input, ctx) {
-    var name = 'World';
-    if (input.name) {
-      name = input.name;
-    }
-    response = {'message': 'Hello ' + name}
-    return response
+fdk.handle(function (input, ctx) {
+  let name = 'World'
+  if (input.name) {
+    name = input.name
+  }
+  let response = {'message': 'Hello ' + name}
+  return response
 })

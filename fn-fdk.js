@@ -151,7 +151,7 @@ function convertResult (result, contextout) {
 
 function buildJSONResponse (result, contextout, protoout) {
   let body = result !== null ? JSON.stringify(result) : ''
-  
+
   return JSON.stringify(
     {
       body: body,
@@ -160,7 +160,7 @@ function buildJSONResponse (result, contextout, protoout) {
         status_code: protoout.status_code,
         headers: protoout.headers
       }
-    })+ "\n"
+    }) + '\n'
 }
 
 function buildJSONError () {
@@ -171,5 +171,5 @@ function buildJSONError () {
       protocol: {
         status_code: 500
       }
-    })+ "\n"
+    }) + '\n'
 }
