@@ -26,7 +26,7 @@ fdk.handle(function(input){
     name = input.name;
   }
   response = {'message': 'Hello ' + name}
-  return JSON.stringify(response)
+  return response
 })
 ```
 
