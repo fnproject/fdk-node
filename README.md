@@ -138,3 +138,9 @@ fdk.handle(function(input, ctx){
    ctx.protocol.statusCode = 302
 })
 ```
+
+## Fn and Node.js Dependencies
+Fn handles Node.js dependencies in the following way:
+
+* If a `package.json` is present without a `node_modules` directory, an Fn build runs an `npm install` within the build process and installs your dependencies.
+* If the `node_modules` is present, Fn assumes you have provided the dependencies yourself and no installation is performed.
