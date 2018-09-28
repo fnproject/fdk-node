@@ -7,6 +7,9 @@ fdk.handle(function (input, ctx) {
   if (input.name) {
     name = input.name
   }
-  let response = {'message': 'Hello ' + name}
-  return response
+  ctx.setResponseHeader('My-Header', 'Foo')
+  ctx.httpGateway.setResponseHeader('My-Header', 'foo', 'bar')
+  ctx.httpGateway.setResponseHeader('Content-Type', 'application/foo+json', 'bar')
+
+  return {'message': 'Hello ' + name}
 })

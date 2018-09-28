@@ -83,7 +83,7 @@ fdk.handle(function(input, ctx){
   if (input) {
     name = input;
   }
-  return 'Hello ' + name + ' from Node call ' + ctx.callId + '!';
+  return 'Hello ' + name + ' from Node call ' + ctx.callID + '!';
 })
 ```
 

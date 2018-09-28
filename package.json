@@ -1,10 +1,11 @@
 {
   "name": "@fnproject/fdk",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "description": "Function Developer Kit for Fn",
   "main": "fn-fdk.js",
   "scripts": {
-    "test": "standard && node test/fn-fdk-test.js"
+    "test": "standard && node test/fn-fdk-test.js",
+    "fix": "standard --fix"
   },
   "repository": {
     "type": "git",
@@ -20,12 +21,11 @@
     }
   ],
   "license": "Apache-2.0",
-  "dependencies": {
-    "jsonparse": "1.3.1"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "rewire": "^3.0.2",
-    "tape": "^4.8.0",
-    "standard": "*"
+    "rewire": "4.0.1",
+    "standard": "11.0.1",
+    "tape": "^4.9.1",
+    "tmp": "0.0.33"
   }
 }
