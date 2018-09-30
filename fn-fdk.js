@@ -406,7 +406,7 @@ class HTTPGatewayContext {
    * @param key {string}
    * @param values {string}
    */
-  addRsponseHeader (key, ...values) {
+  addResponseHeader (key, ...values) {
     this.ctx.addResponseHeader('Fn-Http-H-' + key, ...values)
   }
 }
@@ -598,7 +598,7 @@ class Context {
    * @param key {string}
    * @param values {string}
    */
-  addRsponseHeader (key, ...values) {
+  addResponseHeader (key, ...values) {
     let ckey = canonHeader(key)
     if (this._responseHeaders[ckey] == null) {
       this._responseHeaders[ckey] = []

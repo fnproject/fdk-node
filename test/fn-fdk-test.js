@@ -112,8 +112,8 @@ test('Listens and accepts request', function (t) {
         t.end()
       })
     }).catch(e => t.fail(e))
-    .finally(cleanup)
-    .finally(() => socketFile.removeCallback)
+    .then(cleanup)
+    .then(() => socketFile.removeCallback)
 })
 
 test('handle exception from function', function (t) {
@@ -136,8 +136,76 @@ test('handle exception from function', function (t) {
           t.end()
         })
     }).catch(e => t.fail(e))
-    .finally(cleanup)
-    .finally(() => socketFile.removeCallback)
+    .then(cleanup)
+    .then(() => socketFile.removeCallback)
+})
+
+test('Listens and accepts request', function (t) {
+  let fdk = rewire('../fn-fdk.js')
+  let tmpDir = tmp.dirSync({})
+  let socketFile = path.join(tmpDir.name, 'test.sock')
+  fdk.__set__(defaultSetup(socketFile))
+
+  let deadline = new Date()
+  deadline.setTime(deadline.getTime() + 10000)
+
+  let cleanup = fdk.handle((input, ctx) => {
+    t.equals('callId', ctx.callID)
+    t.equals(deadline.toString(), ctx.deadline.toString())
+    t.equals('fnId', ctx.fnID)
+    t.equals('appId', ctx.appID)
+    t.equals('h1', ctx.getHeader('my-header'))
+    t.deepEquals(['h1', 'h2'], ctx.getAllHeaderValues('my-header'))
+
+    ctx.setResponseHeader('My-Out-Header', 'out')
+    ctx.responseContentType = 'text/plain'
+    return 'done'
+  })
+
+  onSocketExists(socketFile)
+    .then(() => {
+      return request({
+        socketPath: socketFile,
+        path: '/call',
+        host: 'localhost',
+        method: 'POST',
+        headers: {
+          'Fn-Call-Id': 'callId',
+          'Fn-Deadline': deadline.toString(),
+          'My-Header': ['h1', 'h2']
+        }
+      }).then(r => {
+        t.equals(r.body, 'done')
+        t.equals(r.resp.headers['my-out-header'], 'out')
+        t.end()
+      })
+    }).catch(e => t.fail(e))
+    .then(cleanup)
+    .then(() => socketFile.removeCallback)
+})
+
+test('handle multiple requests', function (t) {
+  let fdk = rewire('../fn-fdk.js')
+  let tmpDir = tmp.dirSync({})
+  let socketFile = path.join(tmpDir.name, 'test.sock')
+  fdk.__set__(defaultSetup(socketFile))
+
+  let cleanup = fdk.handle((input, ctx) => {
+    throw Error('Exception in function')
+  })
+
+  onSocketExists(socketFile)
+    .then(async () => {
+      for (let i = 0; i < 10; i++) {
+        let r = await request(defaultRequest(socketFile))
+        t.equals(r.resp.statusCode, 502)
+        t.equals(r.resp.headers['content-type'], 'application/json')
+        t.deepEquals(JSON.parse(r.body).message, 'Exception in function, consult logs for details')
+      }
+      t.end()
+    }).catch(e => t.fail(e))
+    .then(cleanup)
+    .then(() => socketFile.removeCallback)
 })
 
 test('handle raw promise from function', function (t) {
@@ -162,8 +230,8 @@ test('handle raw promise from function', function (t) {
           t.end()
         })
     }).catch(e => t.fail(e))
-    .finally(cleanup)
-    .finally(() => socketFile.removeCallback)
+    .then(cleanup)
+    .then(() => socketFile.removeCallback)
 })
 
 test('handle rejected promise from function', function (t) {
@@ -189,8 +257,8 @@ test('handle rejected promise from function', function (t) {
           t.end()
         })
     }).catch(e => t.fail(e))
-    .finally(cleanup)
-    .finally(() => socketFile.removeCallback)
+    .then(cleanup)
+    .then(() => socketFile.removeCallback)
 })
 
 test('handle async', function (t) {
@@ -221,8 +289,8 @@ test('handle async', function (t) {
           t.end()
         })
     }).catch(e => t.fail(e))
-    .finally(cleanup)
-    .finally(() => socketFile.removeCallback)
+    .then(cleanup)
+    .then(() => socketFile.removeCallback)
 })
 
 test('handle binary input', function (t) {
@@ -249,8 +317,8 @@ test('handle binary input', function (t) {
           t.end()
         })
     }).catch(e => t.fail(e))
-    .finally(cleanup)
-    .finally(() => socketFile.removeCallback)
+    .then(cleanup)
+    .then(() => socketFile.removeCallback)
 })
 
 function defaultSetup (socketFile) {
