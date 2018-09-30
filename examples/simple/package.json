@@ -6,6 +6,6 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "@fnproject/fdk": "fnproject/fdk-node#feature/httpStream"
+    "@fnproject/fdk": "0.x"
   }
 }
