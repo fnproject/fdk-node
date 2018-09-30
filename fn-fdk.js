@@ -69,8 +69,7 @@ class RawResult extends FnResult {
   }
 
   writeResult (ctx, resp) {
-    console.log('writing response', this._raw)
-    resp.write(this._raw, 'binary')
+    resp.write(this._raw)
   }
 }
 
