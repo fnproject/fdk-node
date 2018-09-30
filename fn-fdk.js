@@ -6,12 +6,10 @@ let fs = require('fs')
 let http = require('http')
 let path = require('path')
 
-const fnFunctionExceptionMessage = 'Exception in function--consult logs for details'
-
-let returnShutdown = false
+const fnFunctionExceptionMessage = 'Exception in function, consult logs for details'
 
 /**
- * The function handler  - This is a user-supplied funciton that imlpements the behaviour of the current Node function
+ * The function handler  - This is a user-supplied node function that implements the behaviour of the current fn function
  *
  * @callback fnHandler
  * @param {string|Buffer} the input to the function - this is either a string or a buffer depending on the `inputMode` specified in `handle`
@@ -41,44 +39,58 @@ exports.handle = function (fnfunction, options) {
       process.exit(2)
   }
 
-  let shutDown = fdkHandler(fnfunction, options)
-  if (returnShutdown) {
-    return shutDown
-  }
-}
-
-/**
- * Set the input mode for this function - this determines  how binary data is handled on input to the function
- *
- * @param mode {"buffer"|"string"}
- */
-exports.setInputMode = function (mode) {
-
+  return fdkHandler(fnfunction, options)
 }
 
 /**
  * A function result = this causes the handler wrapper to use a specific response writer
  */
-class Result {
-  // This returns thenable result
-  constructor (writeFunc) {
-    this._writeFunc = writeFunc
-  }
-
-  _fn_writeToStream (stream) {
-    this._writeFunc(stream)
+class FnResult {
+  writeResult (ctx, resp) {
+    throw new Error('should be overridden')
   }
 }
 
-function extractRequestBody (contentType, body) {
-  // console.error("CT:", contentType, "BODY:", body)
-  if (contentType != null && (contentType.toLowerCase().startsWith('application/json') || contentType.toLowerCase().indexOf('+json') > -1)) {
-    if (body === '') {
-      return null
-    }
-    return JSON.parse(body)
+class StreamResult extends FnResult {
+  constructor (stream) {
+    super()
+    this._stream = stream
   }
-  return body
+
+  writeResult (ctx, resp) {
+    this._stream.pipe(resp)
+  }
+}
+
+class RawResult extends FnResult {
+  constructor (raw) {
+    super()
+    this._raw = raw
+  }
+
+  writeResult (ctx, resp) {
+    console.log('writing response', this._raw)
+    resp.write(this._raw, 'binary')
+  }
+}
+
+/**
+ * Send a result from a function as a stream - use this function to wrap a stream and have
+ * @param stream
+ * @returns {StreamResult}
+ */
+exports.streamResult = function (stream) {
+  return new StreamResult(stream)
+}
+
+/**
+ * Send a raw result (either a string or a buffer) to the function response
+ *
+ * @param res {string|Buffer} the result
+ * @returns {RawResult}
+ */
+exports.rawResult = function (res) {
+  return new RawResult(res)
 }
 
 /**
@@ -123,9 +135,8 @@ function sendResult (ctx, resp, result) {
   resp.writeHead(200, 'OK')
 
   if (result != null) {
-    if (typeof result === 'object' && typeof result['_fn_writeToStream'] === 'function') {
-      // function result
-      result._fn_writeToStream(resp)
+    if (result instanceof FnResult) {
+      result.writeResult(ctx, resp)
     } else if (isJSON) {
       resp.write(JSON.stringify(result))
     } else {
@@ -141,7 +152,7 @@ const skipHeaders = {
   'Keep-Alive': true,
   'Transfer-Encoding': true,
   'Trailer': true,
-  'Upgrade': true,
+  'Upgrade': true
 }
 
 class BufferInputHandler {
@@ -201,7 +212,6 @@ function getInputHandler (inputMode) {
     default:
       throw new Error(`Unknown input mode "${inputMode}"`)
   }
-
 }
 
 function handleHTTPStream (fnfunction, options) {
@@ -210,7 +220,7 @@ function handleHTTPStream (fnfunction, options) {
   let inputHandler = getInputHandler(inputMode)
 
   if (listenPort == null || !listenPort.startsWith('unix:')) {
-    console.warn('Invalid configuration no FN_LISTENER variable set or invalid FN_LISTENER value', +listenPort)
+    console.error('Invalid configuration no FN_LISTENER variable set or invalid FN_LISTENER value', +listenPort)
     process.exit(2)
   }
 
@@ -246,7 +256,6 @@ function handleHTTPStream (fnfunction, options) {
       }
 
       let body = inputHandler.getBody()
-      console.debug(`Request: ${JSON.stringify(process.env)}  headers: ${JSON.stringify(headers)}`)
       let ctx = new Context(process.env, body, headers)
 
       ctx.responseContentType = 'application/json'
@@ -273,10 +282,9 @@ function handleHTTPStream (fnfunction, options) {
     .listen(tmpFile, () => {
       fs.chmodSync(tmpFile, '666')
       fs.symlinkSync(tmpFileBaseName, listenFile)
-      console.debug('FDK listening on ', listenFile)
     })
     .on('error', (error) => {
-      console.warn('Unable to connect to unix socket', error)
+      console.warn(`Unable to connect to unix socket ${tmpFile}`, error)
       process.exit(3)
     })
 

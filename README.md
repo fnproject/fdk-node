@@ -25,8 +25,7 @@ fdk.handle(function(input){
   if (input.name) {
     name = input.name;
   }
-  response = {'message': 'Hello ' + name}
-  return response
+  return {'message': 'Hello ' + name}
 })
 ```
 
@@ -38,41 +37,29 @@ The FDK let's you focus on your function logic and not the mechanics.
 Now run it!
 
 ```sh
-fn run
+fn deploy --local --app fdkdemo 
+fn invoke nodefunc
 ```
 
 Now you have a basic running Node function that you can modify and add what you want.
 
-From this point on, it's the same as any other function in any language. 
-deploy the function:
 
 ```sh
-fn deploy --app fnfdk --local
+echo -n "Tom" | fn invoke fdkdemo nodefunc
 ```
 
-Once deployed, you and invoke the function:
+
+You should see the result
 
 ```sh
-echo -n "Tom" | fn call fdkdemo /hello
-```
-
-or
-
-```sh
-curl -d "Tom" http://localhost:8080/r/fdkdemo/hello
-```
-
-In both cases you'll get the response:
-
-```sh
-Hello Tom from Node!
+{"message": "Hello Tom"}
 ```
 
 ## Function Context
 
 Function invocation context details are available through an optional function argument.
 To receive a context object, simply add a second argument to your handler function.
-in the following example the `call_id` is obtained from the context and included in 
+in the following example the `callID` is obtained from the context and included in 
 the response message:
 
 ```javascript
@@ -87,10 +74,13 @@ fdk.handle(function(input, ctx){
 })
 ```
 
-In the case of `default` format functions the context give you access to all environment variables
-including those defined through function or app config as well as those automatically provided
-by Fn like `app_name`, `path`, `memory`, etc.
 
+The context contains other context information about the request such as: 
+
+* `ctx.config` : An Object containing function config variables (from the environment ) (read only)
+*  `ctx.headers` : an object containing input headers for the event as lists of strings 
+* 
+ 
 
 ## Asynchronous function responses
 
@@ -108,34 +98,65 @@ fdk.handle(function(input, ctx){
 
 ## Handling non-json input and output
 
-By default the FDK will convert input with a content-type matching `application/json` into a JSON object as the function input, if the incoming content type is different from `application/json` then the input will be the raw string value of the input. In both cases,  the raw (string) version of the input is also available in `ctx.body`.
+By default the FDK will try and convert input into a JSON object, or fall back to its string format otherwise. 
 
-Likewise by default the output of a function will be treated as a JSON object and converted using JSON.stringify - you can change this behaviour by setting the content type of the response in the context using `ctx.responseContentType='application/text-plain'`. Changing the content type to non-json will result in the output being treated as a string.
+Likewise by default the output of a function will be treated as a JSON object and converted using JSON.stringify. 
+
+
+To change the handling of the input you can add an additional `options` parameter to `fdk.handle` that specifies the input handling strategy: 
+
+```javascript
+function myfunction(input,ctx){}
+
+fdk.handle(myfunction, {inputMode: 'string'})
+```
+
+valid input modes are: 
+*  `json` (the default) attempts to parse the input as json or falls back to raw (possibly binary) string value otherwise
+* `string` always treats input as a string 
+* `buffer` reads input into a `Buffer` object and passes this to your function 
+
+To change the output handling of your function from the default you should wrap the result value using a response decorator: 
+
+```javascript
+function myfunction(input,ctx){
+   return fdk.rawResult("Some string")
+}
+
+fdk.handle(myfunction)
+```
+
+the available decorators are: 
+* `rawResult({string|Buffer})` passes the result directly to the response - the value can be a string or a buffer - this will not encode quotes on string objects 
+* `streamResult({ReadableStream})` pipes the contents of a `ReadableStream` into the output - this allows processing of data from files or HTTP responses 
+
 
 ## Using HTTP headers and setting HTTP status codes
-
 You can read http headers passed into a function invocation using `ctx.protocol.header(key)`, this returns the first header value of the header matching `key` (after canonicalization)  and `ctx.protocol.headers` which returns an object containing all headers.  
 
 ```javascript
 var fdk=require('@fnproject/fdk');
 
 fdk.handle(function(input, ctx){
-  console.log("Authorization header:" , ctx.protocol.header("Authorization"))
-  console.log( ctx.protocol.headers) // prints e.g. { "Content-Type": ["application/json"],"Accept":["application/json","text/plain"] } 
+  
+  let hctx = ctx.httpGateway
+  console.log("Request URL" , hctx.requestURL)
+  
+  console.log("Authorization header:" , hctx.getHeader("Authorization"))
+  console.log( hctx.headers) // prints e.g. { "Content-Type": ["application/json"],"Accept":["application/json","text/plain"] } 
 })
 ```
 
-Outbound headers and the HTTP status code can be modified when the function uses the `json` request format. 
-
-To update the outbound status-code set  `ctx.protocol.statusCode`.  To modify outbound headers use `ctx.protocol.setHeader(k,v)`  or `ctx.protocol.addHeader(k,v)` which set (overwriting existing headers) or add (preserving existing headers) headers to the response respectively.  
-
+Outbound headers and the HTTP status code can be modified in a similar way:  
 
 ```javascript
 var fdk=require('@fnproject/fdk');
 
 fdk.handle(function(input, ctx){
-   ctx.protocol.setHeader("Location","http://example.com")
-   ctx.protocol.statusCode = 302
+    let hctx = ctx.httpGateway
+
+   hctx.setHeader("Location","http://example.com")
+   hctx.statusCode = 302
 })
 ```
 

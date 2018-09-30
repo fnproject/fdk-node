@@ -1,0 +1,10 @@
+func.js
+func.yaml
+README.md
+release.sh
+test.sh
+examples
+.idea
+.circleci
+*.tgz
+test

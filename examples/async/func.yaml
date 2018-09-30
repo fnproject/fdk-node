@@ -1,0 +1,6 @@
+schema_version: 20180708
+name: async
+version: 0.0.8
+runtime: node
+entrypoint: node func.js
+format: http-stream
