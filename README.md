@@ -96,6 +96,8 @@ fdk.handle(function(input, ctx){
 })
 ```
 
+You can also  use `async`/`await` calling conventions in functions. 
+ 
 ## Handling non-json input and output
 
 By default the FDK will try and convert input into a JSON object, or fall back to its string format otherwise. 
