@@ -7,7 +7,6 @@ fdk.handle(async function (buf, ctx) {
   for (let i = 0; i < buf.length; i++) {
     buf[i] = buf[i] + 128 % 255
   }
-  // Setting a content type other than JSON will result
   ctx.responseContentType = 'application/octet-stream'
   return fdk.rawResponse(buf)
 }, {inputMode: 'buffer'})
