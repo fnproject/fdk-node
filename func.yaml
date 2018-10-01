@@ -1,6 +1,0 @@
-# For example func.js
-name: nodefn
-version: 0.0.1
-runtime: node
-entrypoint: node func.js
-format: json

@@ -1,0 +1,7 @@
+schema_version: 20180708
+name: nodefn
+version: 0.0.7
+runtime: node
+entrypoint: node func.js
+format: http-stream
+

@@ -1,1 +1,0 @@
-{"call_id":"01C6DGDGGJ47WGJ00000000000","type":"sync","deadline":"2018-02-15T19:53:16.866Z","body":"\"foo\"","content_type":"application/json","protocol":{"type":"http","method":"POST","request_url":"http://localhost:8080/r/foo/testfn","headers":{"Accept-Encoding":["gzip"],"Content-Type":["application/json"],"User-Agent":["Go-http-client/1.1"]}}}
