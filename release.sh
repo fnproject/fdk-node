@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -ex
 
+# npm install now bumps the package lock, unbump
+git checkout -- package-lock.json
+
 # ensure working dir is clean
 git status
 if [[ -z $(git status -s) ]]
