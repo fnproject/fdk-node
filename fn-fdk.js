@@ -58,7 +58,11 @@ class StreamResult extends FnResult {
   }
 
   writeResult (ctx, resp) {
-    this._stream.pipe(resp)
+    return new Promise((resolve, reject) => {
+      this._stream.pipe(resp)
+      this._stream.on('end', resolve)
+      this._stream.on('error', reject)
+    })
   }
 }
 
@@ -133,16 +137,22 @@ function sendResult (ctx, resp, result) {
   resp.removeHeader('Content-length')
   resp.writeHead(200, 'OK')
 
+  let p
   if (result != null) {
     if (result instanceof FnResult) {
-      result.writeResult(ctx, resp)
+      p = Promise.resolve(result.writeResult(ctx, resp))
     } else if (isJSON) {
-      resp.write(JSON.stringify(result))
+      p = Promise.resolve(resp.write(JSON.stringify(result)))
     } else {
-      resp.write(result)
+      p = Promise.resolve(resp.write(result))
     }
   }
-  resp.end()
+  p.then(() => resp.end(), (err) => {
+    console.log('error writing response data', err)
+    resp.end()
+  })
+
+  return p
 }
 
 const skipHeaders = {
@@ -261,14 +271,13 @@ function handleHTTPStream (fnfunction, options) {
 
       new Promise(function (resolve, reject) {
         try {
-
+          return resolve(fnfunction(body, ctx))
         } catch (error) {
           reject(error)
         }
-        return resolve(fnfunction(body, ctx))
-      }).then(function (result) {
-        sendResult(ctx, resp, result)
-      }, function (error) {
+      }).then((result) => {
+        return sendResult(ctx, resp, result)
+      }, (error) => {
         console.warn('Error in function:', error)
         sendJSONError(resp, 502, {message: fnFunctionExceptionMessage, detail: error.toString()})
       })

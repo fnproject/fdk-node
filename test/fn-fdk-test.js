@@ -293,6 +293,32 @@ test('handle async', function (t) {
     .then(() => socketFile.removeCallback)
 })
 
+test('handle streamed file', function (t) {
+  let fdk = rewire('../fn-fdk.js')
+  let tmpDir = tmp.dirSync({})
+  let socketFile = path.join(tmpDir.name, 'test.sock')
+  fdk.__set__(defaultSetup(socketFile))
+
+  let cleanup = fdk.handle(async function (input, ctx) {
+    ctx.responseContentType = 'text/plain'
+    return fdk.streamResult(fs.createReadStream('test/testfile.txt'))
+  }
+  )
+
+  onSocketExists(socketFile)
+    .then(() => {
+      return request(defaultRequest(socketFile))
+        .then(r => {
+          t.equals(r.resp.statusCode, 200)
+          t.equals(r.resp.headers['content-type'], 'text/plain')
+          t.equals(r.body, 'Lorum ipsum dolor est')
+          t.end()
+        })
+    }).catch(e => t.fail(e))
+    .then(cleanup)
+    .then(() => socketFile.removeCallback)
+})
+
 test('handle binary input', function (t) {
   let fdk = rewire('../fn-fdk.js')
   let tmpDir = tmp.dirSync({})

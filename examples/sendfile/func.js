@@ -5,5 +5,5 @@ const fs = require('fs')
  */
 fdk.handle(function (input, ctx) {
   ctx.responseContentType = 'text/html'
-  return fdk.streamResult(fs.createReadStream('index.html'))
+  return fdk.streamResult(fs.createReadStream('testfile.html'))
 })

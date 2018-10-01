@@ -1,10 +1,10 @@
 schema_version: 20180708
-name: httptrigger
-version: 0.0.1
+name: sendfile
+version: 0.0.6
 runtime: node
 entrypoint: node func.js
 format: json
 triggers:
 - name: mytrigger
   type: http
-  source: /myfn
+  source: /sendfile
