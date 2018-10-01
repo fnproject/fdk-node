@@ -35,7 +35,7 @@ exports.handle = function (fnfunction, options) {
       break
     default:
       console.warn(
-        `The Node.js FDK does not support the '${fnFormat}' format, change the function format to 'http-stream'. Exiting')`)
+        `The Node.js FDK does not support the '${fnFormat}' format, change the function format to 'http-stream'. Exiting)`)
       process.exit(2)
   }
 
