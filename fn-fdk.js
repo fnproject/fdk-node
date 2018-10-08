@@ -226,7 +226,6 @@ function getInputHandler (inputMode) {
 function handleHTTPStream (fnfunction, options) {
   let listenPort = process.env['FN_LISTENER']
   const inputMode = options != null ? (options['inputMode'] || 'json') : 'json'
-  let inputHandler = getInputHandler(inputMode)
 
   if (listenPort == null || !listenPort.startsWith('unix:')) {
     console.error('Invalid configuration no FN_LISTENER variable set or invalid FN_LISTENER value', +listenPort)
@@ -240,6 +239,8 @@ function handleHTTPStream (fnfunction, options) {
   let tmpFile = listenPath + '/' + tmpFileBaseName
 
   let functionHandler = (req, resp) => {
+    let inputHandler = getInputHandler(inputMode)
+
     if (req.method !== 'POST' || req.url !== '/call') {
       sendJSONError(resp, 400, {message: 'Invalid method', detail: `${req.method} ${req.url}`})
       return
