@@ -197,10 +197,10 @@ test('handle multiple requests', function (t) {
   onSocketExists(socketFile)
     .then(async () => {
       for (let i = 0; i < 10; i++) {
-        let r = await request(defaultRequest(socketFile),"r" + i)
+        let r = await request(defaultRequest(socketFile), 'r' + i)
         t.equals(r.resp.statusCode, 200)
         t.equals(r.resp.headers['content-type'], 'application/json')
-        t.equals(r.body,"\"r" + i + "\"")
+        t.equals(r.body, '"r' + i + '"')
       }
       t.end()
     }).catch(e => t.fail(e))
