@@ -24,23 +24,7 @@ const fnFunctionExceptionMessage = 'Exception in function, consult logs for deta
  * @param fnfunction {fnHandler} the function to invoke
  * @param options {object}
  */
-exports.handle = function (fnfunction, options) {
-  let fnFormat = process.env['FN_FORMAT'] || ''
-  let fdkHandler
-
-  // format has been explicitly specified
-  switch (fnFormat.toLowerCase()) {
-    case 'http-stream':
-      fdkHandler = handleHTTPStream
-      break
-    default:
-      console.warn(
-        `The Node.js FDK does not support the '${fnFormat}' format, change the function format to 'http-stream'. Exiting)`)
-      process.exit(2)
-  }
-
-  return fdkHandler(fnfunction, options)
-}
+exports.handle = handleHTTPStream
 
 /**
  * A function result = this causes the handler wrapper to use a specific response writer

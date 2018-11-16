@@ -6,28 +6,6 @@ const path = require('path')
 const fs = require('fs')
 const rewire = require('rewire')
 
-test('reject missing format env ', function (t) {
-  let fdk = rewire('../fn-fdk.js')
-  fdk.__set__(
-    {
-      process: {
-        env: {
-          FN_LISTENER: 'unix:/tmp/foo.sock'
-        },
-        exit: function (code) {
-          t.equals(code, 2)
-          throw new Error('got exit')
-        }
-      }
-    })
-  try {
-    fdk.handle(null)
-    t.fail()
-  } catch (e) {
-    t.end()
-  }
-})
-
 test('reject missing listener  env ', function (t) {
   let fdk = rewire('../fn-fdk.js')
   fdk.__set__(
@@ -35,28 +13,6 @@ test('reject missing listener  env ', function (t) {
       process: {
         env: {
           FN_FORMAT: 'http-stream'
-        },
-        exit: function (code) {
-          t.equals(code, 2)
-          throw new Error('got exit')
-        }
-      }
-    })
-  try {
-    fdk.handle(null)
-    t.fail()
-  } catch (e) {
-    t.end()
-  }
-})
-
-test('reject invalid format', function (t) {
-  let fdk = rewire('../fn-fdk.js')
-  fdk.__set__(
-    {
-      process: {
-        env: {
-          FN_FORMAT: ''
         },
         exit: function (code) {
           t.equals(code, 2)
