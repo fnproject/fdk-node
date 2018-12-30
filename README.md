@@ -45,7 +45,7 @@ Now you have a basic running Node function that you can modify and add what you 
 
 
 ```sh
-echo -n "Tom" | fn invoke fdkdemo nodefunc
+echo -n '{"name": "Tom"}' | fn invoke fdkdemo nodefunc
 ```
 
 
