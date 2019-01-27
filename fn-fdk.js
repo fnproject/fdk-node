@@ -394,7 +394,7 @@ class HTTPGatewayContext {
    * @param status {int}
    */
   set statusCode (status) {
-    this.ctx.setHeader('Fn-Http-Status', status)
+    this.ctx.setResponseHeader('Fn-Http-Status', status)
   }
 
   /**
