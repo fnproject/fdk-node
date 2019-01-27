@@ -89,8 +89,13 @@ test('Listens and accepts request', function (t) {
     t.equals('h1', ctx.getHeader('my-header'))
     t.deepEquals(['h1', 'h2'], ctx.getAllHeaderValues('my-header'))
 
-    ctx.setResponseHeader('My-Out-Header', 'out')
     ctx.responseContentType = 'text/plain'
+
+    let z = ctx.httpGateway
+
+    z.setResponseHeader('My-Out-Header', 'out')
+    z.statusCode = 302
+
     return 'done'
   })
 
@@ -108,7 +113,8 @@ test('Listens and accepts request', function (t) {
         }
       }).then(r => {
         t.equals(r.body, 'done')
-        t.equals(r.resp.headers['my-out-header'], 'out')
+        t.equals(r.resp.headers['fn-http-h-my-out-header'], 'out')
+        t.equals(r.resp.headers['fn-http-status'], '302')
         t.end()
       })
     }).catch(e => t.fail(e))
