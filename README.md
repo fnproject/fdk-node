@@ -166,7 +166,7 @@ const fdk=require('@fnproject/fdk');
 fdk.handle(function(input, ctx){
     let hctx = ctx.httpGateway
 
-   hctx.setHeader("Location","http://example.com")
+   hctx.setResponseHeader("Location","http://example.com")
    hctx.statusCode = 302
 })
 ```
