@@ -288,14 +288,15 @@ function handleHTTPStream (fnfunction, options) {
   }
 
   let currentServer = http.createServer(functionHandler)
-    .listen(tmpFile, () => {
-      fs.chmodSync(tmpFile, '666')
-      fs.symlinkSync(tmpFileBaseName, listenFile)
-    })
-    .on('error', (error) => {
-      console.warn(`Unable to connect to unix socket ${tmpFile}`, error)
-      process.exit(3)
-    })
+  currentServer.keepAliveTimeout = 0 // turn off
+  currentServer.listen(tmpFile, () => {
+    fs.chmodSync(tmpFile, '666')
+    fs.symlinkSync(tmpFileBaseName, listenFile)
+  })
+  currentServer.on('error', (error) => {
+    console.warn(`Unable to connect to unix socket ${tmpFile}`, error)
+    process.exit(3)
+  })
 
   return () => {
     currentServer.close()
