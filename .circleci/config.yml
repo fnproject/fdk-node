@@ -4,9 +4,9 @@ jobs:
     docker:
       - image: circleci/node
     working_directory: ~/go/src/github.com/fnproject/fdk-node
-    # docker:
-    #   - image: node:9
     steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: "Checking Versions"
           command: |
