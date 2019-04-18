@@ -15,12 +15,12 @@ jobs:
       - checkout
       - run:
           command: |
-            npm -v
             sudo npm install -g snyk
       - run:
           name: "test"
           command: |
-              ./test.sh
+              npm install
+              npm run test
       - run:
           command: |
             ./build-images.sh 8
