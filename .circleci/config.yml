@@ -1,7 +1,8 @@
 version: 2
 jobs:
   build:
-    machine: true
+    docker:
+      - image: circleci/node
     working_directory: ~/go/src/github.com/fnproject/fdk-node
     # docker:
     #   - image: node:9
@@ -13,9 +14,26 @@ jobs:
             npm --version
       - checkout
       - run:
+          command: |
+            npm -v
+            sudo npm install -g snyk
+      - run:
           name: "test"
           command: |
               ./test.sh
+      - run:
+          command: |
+            ./build-images.sh 8
+            ./test-images.sh 8
+      - run:
+          command: |
+            ./build-images.sh 10
+            ./test-images.sh 10
+      - run:
+          command: |
+            ./build-images.sh 11
+            ./test-images.sh 11
+
       # TODO: run npm test
       - deploy:
           command: |
@@ -27,4 +45,8 @@ jobs:
               echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
               ./release.sh
               rm -f .npmrc
+              ./build-images.sh 8
+              ./build-images.sh 10
+              ./build-images.sh 11
+              ./release_images.sh
             fi
