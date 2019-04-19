@@ -1,14 +1,12 @@
 version: 2.1
-
 orbs:
   anchore: anchore/anchore-engine@1.2.0
-
 jobs:
 
   "fdk":
     docker:
       - image: circleci/node
-    working_directory: ~/go/src/github.com/fnproject/fdk-node
+    working_directory: ~/fdk-node
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
@@ -40,7 +38,7 @@ jobs:
             fi
   "node8_security_check":
     executor: anchore/anchore_engine
-    working_directory: ~/go/src/github.com/fnproject/fdk-node
+    working_directory: ~/fdk-node
     steps:
       - checkout
       - run:
@@ -51,15 +49,17 @@ jobs:
           image_name: fnproject/node:8-dev
           timeout: '500'
           policy_failure: true
+          policy_bundle_file_path: ~/fdk-node/.circleci/.anchore/policy_bundle.json
       - anchore/analyze_local_image:
           image_name: fnproject/node:8
           timeout: '500'
           policy_failure: true
+          policy_bundle_file_path: ~/fdk-node/.circleci/.anchore/policy_bundle.json
       - anchore/parse_reports
 
   "node10_security_check":
     executor: anchore/anchore_engine
-    working_directory: ~/go/src/github.com/fnproject/fdk-node
+    working_directory: ~/fdk-node
     steps:
       - checkout
       - run:
@@ -70,15 +70,17 @@ jobs:
           image_name: fnproject/node:10-dev
           timeout: '500'
           policy_failure: true
+          policy_bundle_file_path: ~/fdk-node/.circleci/.anchore/policy_bundle.json
       - anchore/analyze_local_image:
           image_name: fnproject/node:10
           timeout: '500'
           policy_failure: true
+          policy_bundle_file_path: ~/fdk-node/.circleci/.anchore/policy_bundle.json
       - anchore/parse_reports
 
   "node11_security_check":
     executor: anchore/anchore_engine
-    working_directory: ~/go/src/github.com/fnproject/fdk-node
+    working_directory: ~/fdk-node
     steps:
       - checkout
       - run:
@@ -89,10 +91,12 @@ jobs:
           image_name: fnproject/node:11-dev
           timeout: '500'
           policy_failure: true
+          policy_bundle_file_path: ~/fdk-node/.circleci/.anchore/policy_bundle.json
       - anchore/analyze_local_image:
           image_name: fnproject/node:11
           timeout: '500'
           policy_failure: true
+          policy_bundle_file_path: ~/fdk-node/.circleci/.anchore/policy_bundle.json
       - anchore/parse_reports
 
 workflows:
