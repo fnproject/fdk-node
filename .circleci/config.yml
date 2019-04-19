@@ -1,8 +1,11 @@
 version: 2.1
+
 orbs:
-  anchore-engine: anchore/anchore-engine@1.2.0
+  anchore: anchore/anchore-engine@1.2.0
+
 jobs:
-  build:
+
+  "fdk":
     docker:
       - image: circleci/node
     working_directory: ~/go/src/github.com/fnproject/fdk-node
@@ -15,9 +18,6 @@ jobs:
             node --version
             npm --version
       - checkout
-      - run:
-          command: |
-            sudo npm install -g snyk
       - run:
           name: "test"
           command: |
@@ -38,12 +38,11 @@ jobs:
               ./build-images.sh 11
               ./release_images.sh
             fi
-  local_image_scan:
+  "node8_security_check":
     executor: anchore/anchore_engine
     working_directory: ~/go/src/github.com/fnproject/fdk-node
     steps:
       - checkout
-
       - run:
           name: Node.JS 8 build
           command: |
@@ -51,12 +50,18 @@ jobs:
       - anchore/analyze_local_image:
           image_name: fnproject/node:8-dev
           timeout: '500'
-          analysis_fail: True
+          policy_failure: true
       - anchore/analyze_local_image:
           image_name: fnproject/node:8
           timeout: '500'
-          analysis_fail: True
+          policy_failure: true
+      - anchore/parse_reports
 
+  "node10_security_check":
+    executor: anchore/anchore_engine
+    working_directory: ~/go/src/github.com/fnproject/fdk-node
+    steps:
+      - checkout
       - run:
           name: Node.JS 10 build
           command: |
@@ -64,12 +69,18 @@ jobs:
       - anchore/analyze_local_image:
           image_name: fnproject/node:10-dev
           timeout: '500'
-          analysis_fail: True
+          policy_failure: true
       - anchore/analyze_local_image:
           image_name: fnproject/node:10
           timeout: '500'
-          analysis_fail: True
+          policy_failure: true
+      - anchore/parse_reports
 
+  "node11_security_check":
+    executor: anchore/anchore_engine
+    working_directory: ~/go/src/github.com/fnproject/fdk-node
+    steps:
+      - checkout
       - run:
           name: Node.JS 11 build
           command: |
@@ -77,8 +88,18 @@ jobs:
       - anchore/analyze_local_image:
           image_name: fnproject/node:11-dev
           timeout: '500'
-          analysis_fail: True
+          policy_failure: true
       - anchore/analyze_local_image:
           image_name: fnproject/node:11
           timeout: '500'
-          analysis_fail: True
+          policy_failure: true
+      - anchore/parse_reports
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - "fdk"
+      - "node8_security_check"
+      - "node10_security_check"
+      - "node11_security_check"
