@@ -43,6 +43,7 @@ jobs:
     working_directory: ~/go/src/github.com/fnproject/fdk-node
     steps:
       - checkout
+
       - run:
           name: Node.JS 8 build
           command: |
