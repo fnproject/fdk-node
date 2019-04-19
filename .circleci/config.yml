@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
   build:
     docker:
@@ -21,20 +21,6 @@ jobs:
           command: |
               npm install
               npm run test
-      - run:
-          command: |
-            ./build-images.sh 8
-            ./test-images.sh 8
-      - run:
-          command: |
-            ./build-images.sh 10
-            ./test-images.sh 10
-      - run:
-          command: |
-            ./build-images.sh 11
-            ./test-images.sh 11
-
-      # TODO: run npm test
       - deploy:
           command: |
             if [[ "${CIRCLE_BRANCH}" == "master" && -z "${CIRCLE_PR_REPONAME}" ]]; then
@@ -50,3 +36,46 @@ jobs:
               ./build-images.sh 11
               ./release_images.sh
             fi
+  local_image_scan:
+    executor: anchore/anchore_engine
+    working_directory: ~/go/src/github.com/fnproject/fdk-node
+    steps:
+      - checkout
+      - run:
+          name: Node.JS 8 build
+          command: |
+            ./build-images.sh 8
+      - anchore/analyze_local_image:
+          image_name: fnproject/node:8-dev
+          timeout: '500'
+          analysis_fail: True
+      - anchore/analyze_local_image:
+          image_name: fnproject/node:8
+          timeout: '500'
+          analysis_fail: True
+
+      - run:
+          name: Node.JS 10 build
+          command: |
+            ./build-images.sh 10
+      - anchore/analyze_local_image:
+          image_name: fnproject/node:10-dev
+          timeout: '500'
+          analysis_fail: True
+      - anchore/analyze_local_image:
+          image_name: fnproject/node:10
+          timeout: '500'
+          analysis_fail: True
+
+      - run:
+          name: Node.JS 11 build
+          command: |
+            ./build-images.sh 11
+      - anchore/analyze_local_image:
+          image_name: fnproject/node:11-dev
+          timeout: '500'
+          analysis_fail: True
+      - anchore/analyze_local_image:
+          image_name: fnproject/node:11
+          timeout: '500'
+          analysis_fail: True
