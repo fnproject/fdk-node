@@ -36,7 +36,7 @@ jobs:
               ./build-images.sh 11
               ./release_images.sh
             fi
-  "node8_security_check":
+  "node8dev_security_check":
     executor: anchore/anchore_engine
     working_directory: ~/fdk-node
     steps:
@@ -50,6 +50,17 @@ jobs:
           timeout: '500'
           policy_failure: true
           policy_bundle_file_path: ~/fdk-node/.circleci/.anchore/policy_bundle.json
+      - anchore/parse_reports
+
+  "node8runtime_security_check":
+    executor: anchore/anchore_engine
+    working_directory: ~/fdk-node
+    steps:
+      - checkout
+      - run:
+          name: Node.JS 8 build
+          command: |
+            ./build-images.sh 8
       - anchore/analyze_local_image:
           image_name: fnproject/node:8
           timeout: '500'
@@ -57,7 +68,7 @@ jobs:
           policy_bundle_file_path: ~/fdk-node/.circleci/.anchore/policy_bundle.json
       - anchore/parse_reports
 
-  "node10_security_check":
+  "node10dev_security_check":
     executor: anchore/anchore_engine
     working_directory: ~/fdk-node
     steps:
@@ -71,6 +82,17 @@ jobs:
           timeout: '500'
           policy_failure: true
           policy_bundle_file_path: ~/fdk-node/.circleci/.anchore/policy_bundle.json
+      - anchore/parse_reports
+
+  "node10runtime_security_check":
+    executor: anchore/anchore_engine
+    working_directory: ~/fdk-node
+    steps:
+      - checkout
+      - run:
+          name: Node.JS 10 build
+          command: |
+            ./build-images.sh 10
       - anchore/analyze_local_image:
           image_name: fnproject/node:10
           timeout: '500'
@@ -78,7 +100,7 @@ jobs:
           policy_bundle_file_path: ~/fdk-node/.circleci/.anchore/policy_bundle.json
       - anchore/parse_reports
 
-  "node11_security_check":
+  "node11dev_security_check":
     executor: anchore/anchore_engine
     working_directory: ~/fdk-node
     steps:
@@ -92,6 +114,17 @@ jobs:
           timeout: '500'
           policy_failure: true
           policy_bundle_file_path: ~/fdk-node/.circleci/.anchore/policy_bundle.json
+      - anchore/parse_reports
+
+  "node11runtime_security_check":
+    executor: anchore/anchore_engine
+    working_directory: ~/fdk-node
+    steps:
+      - checkout
+      - run:
+          name: Node.JS 11 build
+          command: |
+            ./build-images.sh 11
       - anchore/analyze_local_image:
           image_name: fnproject/node:11
           timeout: '500'
@@ -104,6 +137,9 @@ workflows:
   build:
     jobs:
       - "fdk"
-      - "node8_security_check"
-      - "node10_security_check"
-      - "node11_security_check"
+      - "node8dev_security_check"
+      - "node8runtime_security_check"
+      - "node10dev_security_check"
+      - "node10runtime_security_check"
+      - "node11dev_security_check"
+      - "node11runtime_security_check"
