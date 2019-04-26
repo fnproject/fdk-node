@@ -223,6 +223,21 @@ function getInputHandler (inputMode) {
   }
 }
 
+function logFramer (req) {
+  let framer = process.env['FN_LOGFRAME_NAME']
+
+  if (framer !== '') {
+    let valueSrc = process.env['FN_LOGFRAME_HDR']
+    if (valueSrc !== '') {
+      let id = req.headers[valueSrc]
+      if (id !== '') {
+        console.log(framer + '=' + id)
+        console.error(framer + '=' + id)
+      }
+    }
+  }
+}
+
 function handleHTTPStream (fnfunction, options) {
   let listenPort = process.env['FN_LISTENER']
   const inputMode = options != null ? (options['inputMode'] || 'json') : 'json'
@@ -239,6 +254,7 @@ function handleHTTPStream (fnfunction, options) {
   let tmpFile = listenPath + '/' + tmpFileBaseName
 
   let functionHandler = (req, resp) => {
+    logFramer(req)
     let inputHandler = getInputHandler(inputMode)
 
     if (req.method !== 'POST' || req.url !== '/call') {
