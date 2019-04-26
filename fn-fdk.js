@@ -231,8 +231,8 @@ function logFramer (req) {
     if (valueSrc !== '') {
       let id = req.headers[valueSrc]
       if (id !== '') {
-        console.log(framer + '=' + id)
-        console.error(framer + '=' + id)
+        console.log('\n' + framer + '=' + id + '\n')
+        console.error('\n' + framer + '=' + id + '\n')
       }
     }
   }
