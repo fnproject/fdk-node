@@ -361,7 +361,9 @@ function defaultSetup (socketFile) {
         FN_LISTENER: 'unix:' + socketFile,
         FN_MEMORY: '128',
         FN_FN_ID: 'fnId',
-        FN_APP_ID: 'appId'
+        FN_APP_ID: 'appId',
+        FN_LOGFRAME_NAME: 'foo',
+        FN_LOGFRAME_HDR: 'Fn-Call-Id'
       },
       exit: function () {
         throw new Error('got exit')

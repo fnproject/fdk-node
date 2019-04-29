@@ -223,13 +223,12 @@ function getInputHandler (inputMode) {
   }
 }
 
-function logFramer (req) {
+function logFramer (ctx) {
   let framer = process.env['FN_LOGFRAME_NAME']
-
   if (framer !== '') {
     let valueSrc = process.env['FN_LOGFRAME_HDR']
     if (valueSrc !== '') {
-      let id = req.headers[valueSrc]
+      let id = ctx.getHeader(valueSrc)
       if (id !== '') {
         console.log('\n' + framer + '=' + id + '\n')
         console.error('\n' + framer + '=' + id + '\n')
@@ -254,7 +253,6 @@ function handleHTTPStream (fnfunction, options) {
   let tmpFile = listenPath + '/' + tmpFileBaseName
 
   let functionHandler = (req, resp) => {
-    logFramer(req)
     let inputHandler = getInputHandler(inputMode)
 
     if (req.method !== 'POST' || req.url !== '/call') {
@@ -283,7 +281,7 @@ function handleHTTPStream (fnfunction, options) {
 
       let body = inputHandler.getBody()
       let ctx = new Context(process.env, body, headers)
-
+      logFramer(ctx)
       ctx.responseContentType = 'application/json'
 
       new Promise(function (resolve, reject) {
