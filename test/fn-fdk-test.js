@@ -5,6 +5,39 @@ const test = require('tape')
 const path = require('path')
 const fs = require('fs')
 const rewire = require('rewire')
+const sinon = require('sinon')
+const assert = require('assert')
+
+test('print logFramer', function (t) {
+  let fdk = rewire('../fn-fdk.js')
+  let logFake = sinon.fake()
+  let errorFake = sinon.fake()
+  fdk.__set__(
+    {
+      process: {
+        env: {
+          FN_LOGFRAME_NAME: 'foo',
+          FN_LOGFRAME_HDR: 'Fn-Call-Id'
+        },
+        exit: function (code) {
+          t.equals(code, 2)
+          throw new Error('got exit')
+        }
+      },
+      console: {
+        log: logFake,
+        error: errorFake
+      }
+    })
+  try {
+    fdk.handle(null)
+    t.fail()
+  } catch (e) {
+    t.end()
+  }
+  assert(logFake, '\nfoo=callId\n')
+  assert(errorFake, '\nfoo=callId\n')
+})
 
 test('reject missing format env ', function (t) {
   let fdk = rewire('../fn-fdk.js')
@@ -361,9 +394,7 @@ function defaultSetup (socketFile) {
         FN_LISTENER: 'unix:' + socketFile,
         FN_MEMORY: '128',
         FN_FN_ID: 'fnId',
-        FN_APP_ID: 'appId',
-        FN_LOGFRAME_NAME: 'foo',
-        FN_LOGFRAME_HDR: 'Fn-Call-Id'
+        FN_APP_ID: 'appId'
       },
       exit: function () {
         throw new Error('got exit')
