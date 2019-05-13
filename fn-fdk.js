@@ -230,8 +230,8 @@ function logFramer (ctx) {
     if (valueSrc !== '') {
       let id = ctx.getHeader(valueSrc)
       if (id !== '') {
-        console.log('\n' + framer + '=' + id + '\n')
-        console.error('\n' + framer + '=' + id + '\n')
+        console.log('\n' + framer + '=' + id)
+        console.error('\n' + framer + '=' + id)
       }
     }
   }
