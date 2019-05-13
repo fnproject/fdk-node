@@ -8,6 +8,9 @@ let path = require('path')
 
 const fnFunctionExceptionMessage = 'Exception in function, consult logs for details'
 
+let fnLogframeName
+let fnLogframeHdr
+
 /**
  * The function handler  - This is a user-supplied node function that implements the behaviour of the current fn function
  *
@@ -27,6 +30,9 @@ const fnFunctionExceptionMessage = 'Exception in function, consult logs for deta
 exports.handle = function (fnfunction, options) {
   let fnFormat = process.env['FN_FORMAT'] || ''
   let fdkHandler
+
+  fnLogframeName = process.env['FN_LOGFRAME_NAME'] || ''
+  fnLogframeHdr = process.env['FN_LOGFRAME_HDR'] || ''
 
   // format has been explicitly specified
   switch (fnFormat.toLowerCase()) {
@@ -224,15 +230,11 @@ function getInputHandler (inputMode) {
 }
 
 function logFramer (ctx) {
-  let framer = process.env['FN_LOGFRAME_NAME']
-  if (framer !== '') {
-    let valueSrc = process.env['FN_LOGFRAME_HDR']
-    if (valueSrc !== '') {
-      let id = ctx.getHeader(valueSrc)
-      if (id !== '') {
-        console.log('\n' + framer + '=' + id)
-        console.error('\n' + framer + '=' + id)
-      }
+  if ((fnLogframeName !== '') && (fnLogframeHdr !== '')) {
+    let id = ctx.getHeader(fnLogframeHdr)
+    if (id !== '') {
+      console.log('\n' + fnLogframeName + '=' + id)
+      console.error('\n' + fnLogframeName + '=' + id)
     }
   }
 }

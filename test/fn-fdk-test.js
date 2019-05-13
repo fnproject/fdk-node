@@ -6,7 +6,6 @@ const path = require('path')
 const fs = require('fs')
 const rewire = require('rewire')
 const sinon = require('sinon')
-// const assert = require('assert')
 
 test('print logFramer', function (t) {
   let fdk = rewire('../fn-fdk.js')
@@ -25,11 +24,11 @@ test('print logFramer', function (t) {
       },
       exit: function () {
         throw new Error('got exit')
-      },
-      console: {
-        log: logFake,
-        error: errorFake
       }
+    },
+    console: {
+      log: logFake,
+      error: errorFake
     }
   })
   let cleanup = fdk.handle((input, ctx) => {
@@ -39,7 +38,7 @@ test('print logFramer', function (t) {
     ctx.responseContentType = 'text/plain'
     let z = ctx.httpGateway
     z.statusCode = 200
-    return '\n' + ctx.FN_LOGFRAME_HDR + '=' + ctx.getHeader('Fn-Call-Id')
+    return '\n' + ctx.config.FN_LOGFRAME_NAME + '=' + ctx.getHeader('Fn-Call-Id')
   })
 
   onSocketExists(socketFile)
@@ -55,23 +54,14 @@ test('print logFramer', function (t) {
       }).then(r => {
         t.equals(r.body, '\nfoo=callId')
         t.equals(r.resp.headers['fn-http-status'], '200')
+        t.ok(logFake.calledWith('\nfoo=callId'))
+        t.ok(errorFake.calledWith('\nfoo=callId'))
         t.end()
       })
     })
     .then(cleanup)
     .then(() => socketFile.removeCallback)
     .catch(e => t.fail(e))
-  // try {
-  //   fdk.handle(null)
-  //   t.fail()
-  // } catch (e) {
-  //   t.end()
-  // }
-  // console.log('calledOnce ' + Object.entries(logFake))
-  // console.log('logfake: ' + logFake.lastArg)
-  // console.log('errorfake: ' + errorFake.lastArg)
-  // assert(logFake.calledWith('\nfoo=callId\n'))
-  // assert(errorFake.calledWith('\nfoo=callId\n'))
 })
 
 test('reject missing format env ', function (t) {
