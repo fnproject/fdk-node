@@ -8,9 +8,6 @@ let path = require('path')
 
 const fnFunctionExceptionMessage = 'Exception in function, consult logs for details'
 
-let fnLogframeName
-let fnLogframeHdr
-
 /**
  * The function handler  - This is a user-supplied node function that implements the behaviour of the current fn function
  *
@@ -30,9 +27,6 @@ let fnLogframeHdr
 exports.handle = function (fnfunction, options) {
   let fnFormat = process.env['FN_FORMAT'] || ''
   let fdkHandler
-
-  fnLogframeName = process.env['FN_LOGFRAME_NAME'] || ''
-  fnLogframeHdr = process.env['FN_LOGFRAME_HDR'] || ''
 
   // format has been explicitly specified
   switch (fnFormat.toLowerCase()) {
@@ -229,7 +223,7 @@ function getInputHandler (inputMode) {
   }
 }
 
-function logFramer (ctx) {
+function logFramer (ctx, fnLogframeName, fnLogframeHdr) {
   if ((fnLogframeName !== '') && (fnLogframeHdr !== '')) {
     let id = ctx.getHeader(fnLogframeHdr)
     if (id !== '') {
@@ -253,6 +247,9 @@ function handleHTTPStream (fnfunction, options) {
 
   let tmpFileBaseName = path.basename(listenFile) + '.tmp'
   let tmpFile = listenPath + '/' + tmpFileBaseName
+
+  const fnLogframeName = process.env['FN_LOGFRAME_NAME'] || ''
+  const fnLogframeHdr = process.env['FN_LOGFRAME_HDR'] || ''
 
   let functionHandler = (req, resp) => {
     let inputHandler = getInputHandler(inputMode)
@@ -283,7 +280,7 @@ function handleHTTPStream (fnfunction, options) {
 
       let body = inputHandler.getBody()
       let ctx = new Context(process.env, body, headers)
-      logFramer(ctx)
+      logFramer(ctx, fnLogframeName, fnLogframeHdr)
       ctx.responseContentType = 'application/json'
 
       new Promise(function (resolve, reject) {
