@@ -5,6 +5,64 @@ const test = require('tape')
 const path = require('path')
 const fs = require('fs')
 const rewire = require('rewire')
+const sinon = require('sinon')
+
+test('print logFramer', function (t) {
+  let fdk = rewire('../fn-fdk.js')
+  let tmpDir = tmp.dirSync({})
+  let socketFile = path.join(tmpDir.name, 'test.sock')
+  let logFake = sinon.fake()
+  let errorFake = sinon.fake()
+  fdk.__set__({
+    process: {
+      env: {
+        FN_FORMAT: 'http-stream',
+        FN_LISTENER: 'unix:' + socketFile,
+        FN_MEMORY: '128',
+        FN_LOGFRAME_NAME: 'foo',
+        FN_LOGFRAME_HDR: 'Fn-Call-Id'
+      },
+      exit: function () {
+        throw new Error('got exit')
+      }
+    },
+    console: {
+      log: logFake,
+      error: errorFake
+    }
+  })
+  let cleanup = fdk.handle((input, ctx) => {
+    t.equals('callId', ctx.callID)
+    t.equals('callId', ctx.getHeader('Fn-Call-Id'))
+
+    ctx.responseContentType = 'text/plain'
+    let z = ctx.httpGateway
+    z.statusCode = 200
+    return '\n' + ctx.config.FN_LOGFRAME_NAME + '=' + ctx.getHeader('Fn-Call-Id')
+  })
+
+  onSocketExists(socketFile)
+    .then(() => {
+      return request({
+        socketPath: socketFile,
+        path: '/call',
+        host: 'localhost',
+        method: 'POST',
+        headers: {
+          'Fn-Call-Id': 'callId'
+        }
+      }).then(r => {
+        t.equals(r.body, '\nfoo=callId')
+        t.equals(r.resp.headers['fn-http-status'], '200')
+        t.ok(logFake.calledWith('\nfoo=callId'))
+        t.ok(errorFake.calledWith('\nfoo=callId'))
+        t.end()
+      })
+    })
+    .then(cleanup)
+    .then(() => socketFile.removeCallback)
+    .catch(e => t.fail(e))
+})
 
 test('reject missing format env ', function (t) {
   let fdk = rewire('../fn-fdk.js')
@@ -117,9 +175,10 @@ test('Listens and accepts request', function (t) {
         t.equals(r.resp.headers['fn-http-status'], '302')
         t.end()
       })
-    }).catch(e => t.fail(e))
+    })
     .then(cleanup)
     .then(() => socketFile.removeCallback)
+    .catch(e => t.fail(e))
 })
 
 test('handle exception from function', function (t) {

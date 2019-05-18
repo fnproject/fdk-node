@@ -223,6 +223,16 @@ function getInputHandler (inputMode) {
   }
 }
 
+function logFramer (ctx, fnLogframeName, fnLogframeHdr) {
+  if ((fnLogframeName !== '') && (fnLogframeHdr !== '')) {
+    let id = ctx.getHeader(fnLogframeHdr)
+    if (id !== '') {
+      console.log('\n' + fnLogframeName + '=' + id)
+      console.error('\n' + fnLogframeName + '=' + id)
+    }
+  }
+}
+
 function handleHTTPStream (fnfunction, options) {
   let listenPort = process.env['FN_LISTENER']
   const inputMode = options != null ? (options['inputMode'] || 'json') : 'json'
@@ -237,6 +247,9 @@ function handleHTTPStream (fnfunction, options) {
 
   let tmpFileBaseName = path.basename(listenFile) + '.tmp'
   let tmpFile = listenPath + '/' + tmpFileBaseName
+
+  const fnLogframeName = process.env['FN_LOGFRAME_NAME'] || ''
+  const fnLogframeHdr = process.env['FN_LOGFRAME_HDR'] || ''
 
   let functionHandler = (req, resp) => {
     let inputHandler = getInputHandler(inputMode)
@@ -267,7 +280,7 @@ function handleHTTPStream (fnfunction, options) {
 
       let body = inputHandler.getBody()
       let ctx = new Context(process.env, body, headers)
-
+      logFramer(ctx, fnLogframeName, fnLogframeHdr)
       ctx.responseContentType = 'application/json'
 
       new Promise(function (resolve, reject) {
