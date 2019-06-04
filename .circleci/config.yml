@@ -5,22 +5,17 @@ jobs:
 
   "test":
     docker:
-      - image: circleci/node
+      - image: circleci/node:9-stretch
     working_directory: ~/fdk-node
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
-      - run:
-          name: "Checking Versions"
-          command: |
-            node --version
-            npm --version
       - checkout
       - run:
           name: "test"
           command: |
-              npm install
-              npm run test
+            npm install
+            npm run test
       - deploy:
           command: |
             if [[ "${CIRCLE_BRANCH}" == "master" && -z "${CIRCLE_PR_REPONAME}" ]]; then
