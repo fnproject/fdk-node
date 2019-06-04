@@ -1,22 +1,21 @@
-version: 2
+version: 2.1
+orbs:
+  anchore: anchore/anchore-engine@1.3.0
 jobs:
-  build:
-    machine: true
-    working_directory: ~/go/src/github.com/fnproject/fdk-node
-    # docker:
-    #   - image: node:9
+
+  "test":
+    docker:
+      - image: circleci/node:9-stretch
+    working_directory: ~/fdk-node
     steps:
-      - run:
-          name: "Checking Versions"
-          command: |
-            node --version
-            npm --version
+      - setup_remote_docker:
+          docker_layer_caching: true
       - checkout
       - run:
           name: "test"
           command: |
-              ./test.sh
-      # TODO: run npm test
+            npm install
+            npm run test
       - deploy:
           command: |
             if [[ "${CIRCLE_BRANCH}" == "master" && -z "${CIRCLE_PR_REPONAME}" ]]; then
@@ -27,4 +26,83 @@ jobs:
               echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
               ./release.sh
               rm -f .npmrc
+              ./build-images.sh 9
+              ./build-images.sh 10
+              ./build-images.sh 11
+              ./release_images.sh
             fi
+
+  "node9_security_check":
+    executor: anchore/anchore_engine
+    working_directory: ~/fdk-node
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - checkout
+      - run:
+          name: Node.JS 9 build
+          command: |
+            apk add bash
+            ./build-images.sh 9
+      - anchore/analyze_local_image:
+          image_name: "fnproject/node:9-dev fnproject/node:9"
+          timeout: '500'
+          policy_failure: true
+          policy_bundle_file_path: .circleci/.anchore/policy_bundle.json
+      - anchore/parse_reports
+
+  "node10_security_check":
+    executor: anchore/anchore_engine
+    working_directory: ~/fdk-node
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - checkout
+      - run:
+          name: Node.JS 10 build
+          command: |
+            apk add bash
+            ./build-images.sh 10
+      - anchore/analyze_local_image:
+          image_name: "fnproject/node:10-dev fnproject/node:10"
+          timeout: '500'
+          policy_failure: true
+          policy_bundle_file_path: .circleci/.anchore/policy_bundle.json
+      - anchore/parse_reports
+
+  "node11_security_check":
+    executor: anchore/anchore_engine
+    working_directory: ~/fdk-node
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - checkout
+      - run:
+          name: Node.JS 11 build
+          command: |
+            apk add bash
+            ./build-images.sh 11
+      - anchore/analyze_local_image:
+          image_name: "fnproject/node:11-dev fnproject/node:11"
+          timeout: '500'
+          policy_failure: true
+          policy_bundle_file_path: .circleci/.anchore/policy_bundle.json
+      - anchore/parse_reports
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - "test"
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - "node9_security_check"
+      - "node10_security_check"
+      - "node11_security_check"
