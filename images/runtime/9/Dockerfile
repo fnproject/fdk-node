@@ -1,4 +1,4 @@
-FROM node:8-stretch-slim
+FROM node:9-stretch-slim
 
 RUN apt-get update && apt-get upgrade -qy && apt-get clean
 # for some reason i see this:

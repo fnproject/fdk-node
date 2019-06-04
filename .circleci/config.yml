@@ -26,13 +26,13 @@ jobs:
               echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
               ./release.sh
               rm -f .npmrc
-              ./build-images.sh 8
+              ./build-images.sh 9
               ./build-images.sh 10
               ./build-images.sh 11
               ./release_images.sh
             fi
 
-  "node8_security_check":
+  "node9_security_check":
     executor: anchore/anchore_engine
     working_directory: ~/fdk-node
     steps:
@@ -40,12 +40,12 @@ jobs:
           docker_layer_caching: true
       - checkout
       - run:
-          name: Node.JS 8 build
+          name: Node.JS 9 build
           command: |
             apk add bash
-            ./build-images.sh 8
+            ./build-images.sh 9
       - anchore/analyze_local_image:
-          image_name: "fnproject/node:8-dev fnproject/node:8"
+          image_name: "fnproject/node:9-dev fnproject/node:9"
           timeout: '500'
           policy_failure: true
           policy_bundle_file_path: .circleci/.anchore/policy_bundle.json
@@ -103,6 +103,6 @@ workflows:
               only:
                 - master
     jobs:
-      - "node8_security_check"
+      - "node9_security_check"
       - "node10_security_check"
       - "node11_security_check"
