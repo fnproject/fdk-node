@@ -8,11 +8,11 @@ const rewire = require('rewire')
 const sinon = require('sinon')
 
 test('print logFramer', function (t) {
-  let fdk = rewire('../fn-fdk.js')
-  let tmpDir = tmp.dirSync({})
-  let socketFile = path.join(tmpDir.name, 'test.sock')
-  let logFake = sinon.fake()
-  let errorFake = sinon.fake()
+  const fdk = rewire('../fn-fdk.js')
+  const tmpDir = tmp.dirSync({})
+  const socketFile = path.join(tmpDir.name, 'test.sock')
+  const logFake = sinon.fake()
+  const errorFake = sinon.fake()
   fdk.__set__({
     process: {
       env: {
@@ -31,12 +31,12 @@ test('print logFramer', function (t) {
       error: errorFake
     }
   })
-  let cleanup = fdk.handle((input, ctx) => {
+  const cleanup = fdk.handle((input, ctx) => {
     t.equals('callId', ctx.callID)
     t.equals('callId', ctx.getHeader('Fn-Call-Id'))
 
     ctx.responseContentType = 'text/plain'
-    let z = ctx.httpGateway
+    const z = ctx.httpGateway
     z.statusCode = 200
     return '\n' + ctx.config.FN_LOGFRAME_NAME + '=' + ctx.getHeader('Fn-Call-Id')
   })
@@ -65,7 +65,7 @@ test('print logFramer', function (t) {
 })
 
 test('reject missing format env ', function (t) {
-  let fdk = rewire('../fn-fdk.js')
+  const fdk = rewire('../fn-fdk.js')
   fdk.__set__(
     {
       process: {
@@ -87,7 +87,7 @@ test('reject missing format env ', function (t) {
 })
 
 test('reject missing listener  env ', function (t) {
-  let fdk = rewire('../fn-fdk.js')
+  const fdk = rewire('../fn-fdk.js')
   fdk.__set__(
     {
       process: {
@@ -109,7 +109,7 @@ test('reject missing listener  env ', function (t) {
 })
 
 test('reject invalid format', function (t) {
-  let fdk = rewire('../fn-fdk.js')
+  const fdk = rewire('../fn-fdk.js')
   fdk.__set__(
     {
       process: {
@@ -131,15 +131,15 @@ test('reject invalid format', function (t) {
 })
 
 test('Listens and accepts request', function (t) {
-  let fdk = rewire('../fn-fdk.js')
-  let tmpDir = tmp.dirSync({})
-  let socketFile = path.join(tmpDir.name, 'test.sock')
+  const fdk = rewire('../fn-fdk.js')
+  const tmpDir = tmp.dirSync({})
+  const socketFile = path.join(tmpDir.name, 'test.sock')
   fdk.__set__(defaultSetup(socketFile))
 
-  let deadline = new Date()
+  const deadline = new Date()
   deadline.setTime(deadline.getTime() + 10000)
 
-  let cleanup = fdk.handle((input, ctx) => {
+  const cleanup = fdk.handle((input, ctx) => {
     t.equals('callId', ctx.callID)
     t.equals(deadline.toString(), ctx.deadline.toString())
     t.equals('fnId', ctx.fnID)
@@ -149,7 +149,7 @@ test('Listens and accepts request', function (t) {
 
     ctx.responseContentType = 'text/plain'
 
-    let z = ctx.httpGateway
+    const z = ctx.httpGateway
 
     z.setResponseHeader('My-Out-Header', 'out')
     z.statusCode = 302
@@ -182,12 +182,12 @@ test('Listens and accepts request', function (t) {
 })
 
 test('handle exception from function', function (t) {
-  let fdk = rewire('../fn-fdk.js')
-  let tmpDir = tmp.dirSync({})
-  let socketFile = path.join(tmpDir.name, 'test.sock')
+  const fdk = rewire('../fn-fdk.js')
+  const tmpDir = tmp.dirSync({})
+  const socketFile = path.join(tmpDir.name, 'test.sock')
   fdk.__set__(defaultSetup(socketFile))
 
-  let cleanup = fdk.handle((input, ctx) => {
+  const cleanup = fdk.handle((input, ctx) => {
     throw Error('Exception in function')
   })
 
@@ -206,15 +206,15 @@ test('handle exception from function', function (t) {
 })
 
 test('Listens and accepts request', function (t) {
-  let fdk = rewire('../fn-fdk.js')
-  let tmpDir = tmp.dirSync({})
-  let socketFile = path.join(tmpDir.name, 'test.sock')
+  const fdk = rewire('../fn-fdk.js')
+  const tmpDir = tmp.dirSync({})
+  const socketFile = path.join(tmpDir.name, 'test.sock')
   fdk.__set__(defaultSetup(socketFile))
 
-  let deadline = new Date()
+  const deadline = new Date()
   deadline.setTime(deadline.getTime() + 10000)
 
-  let cleanup = fdk.handle((input, ctx) => {
+  const cleanup = fdk.handle((input, ctx) => {
     t.equals('callId', ctx.callID)
     t.equals(deadline.toString(), ctx.deadline.toString())
     t.equals('fnId', ctx.fnID)
@@ -250,19 +250,19 @@ test('Listens and accepts request', function (t) {
 })
 
 test('handle multiple requests', function (t) {
-  let fdk = rewire('../fn-fdk.js')
-  let tmpDir = tmp.dirSync({})
-  let socketFile = path.join(tmpDir.name, 'test.sock')
+  const fdk = rewire('../fn-fdk.js')
+  const tmpDir = tmp.dirSync({})
+  const socketFile = path.join(tmpDir.name, 'test.sock')
   fdk.__set__(defaultSetup(socketFile))
 
-  let cleanup = fdk.handle((input, ctx) => {
+  const cleanup = fdk.handle((input, ctx) => {
     return input
   })
 
   onSocketExists(socketFile)
     .then(async () => {
       for (let i = 0; i < 10; i++) {
-        let r = await request(defaultRequest(socketFile), 'r' + i)
+        const r = await request(defaultRequest(socketFile), 'r' + i)
         t.equals(r.resp.statusCode, 200)
         t.equals(r.resp.headers['content-type'], 'application/json')
         t.equals(r.body, '"r' + i + '"')
@@ -274,12 +274,12 @@ test('handle multiple requests', function (t) {
 })
 
 test('handle raw promise from function', function (t) {
-  let fdk = rewire('../fn-fdk.js')
-  let tmpDir = tmp.dirSync({})
-  let socketFile = path.join(tmpDir.name, 'test.sock')
+  const fdk = rewire('../fn-fdk.js')
+  const tmpDir = tmp.dirSync({})
+  const socketFile = path.join(tmpDir.name, 'test.sock')
   fdk.__set__(defaultSetup(socketFile))
 
-  let cleanup = fdk.handle((input, ctx) => {
+  const cleanup = fdk.handle((input, ctx) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => resolve('result'), 1)
     })
@@ -300,12 +300,12 @@ test('handle raw promise from function', function (t) {
 })
 
 test('handle rejected promise from function', function (t) {
-  let fdk = rewire('../fn-fdk.js')
-  let tmpDir = tmp.dirSync({})
-  let socketFile = path.join(tmpDir.name, 'test.sock')
+  const fdk = rewire('../fn-fdk.js')
+  const tmpDir = tmp.dirSync({})
+  const socketFile = path.join(tmpDir.name, 'test.sock')
   fdk.__set__(defaultSetup(socketFile))
 
-  let cleanup = fdk.handle((input, ctx) => {
+  const cleanup = fdk.handle((input, ctx) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => reject(new Error('Exception in function')), 1)
     })
@@ -327,18 +327,18 @@ test('handle rejected promise from function', function (t) {
 })
 
 test('handle async', function (t) {
-  let fdk = rewire('../fn-fdk.js')
-  let tmpDir = tmp.dirSync({})
-  let socketFile = path.join(tmpDir.name, 'test.sock')
+  const fdk = rewire('../fn-fdk.js')
+  const tmpDir = tmp.dirSync({})
+  const socketFile = path.join(tmpDir.name, 'test.sock')
   fdk.__set__(defaultSetup(socketFile))
 
-  let promiseFunc = () => {
+  const promiseFunc = () => {
     return new Promise((resolve, reject) => {
       setTimeout(() => resolve('async result'), 1)
     })
   }
-  let cleanup = fdk.handle(async function (input, ctx) {
-    let result = await promiseFunc()
+  const cleanup = fdk.handle(async function (input, ctx) {
+    const result = await promiseFunc()
     t.equals(result, 'async result')
     return result
   }
@@ -359,12 +359,12 @@ test('handle async', function (t) {
 })
 
 test('handle streamed file', function (t) {
-  let fdk = rewire('../fn-fdk.js')
-  let tmpDir = tmp.dirSync({})
-  let socketFile = path.join(tmpDir.name, 'test.sock')
+  const fdk = rewire('../fn-fdk.js')
+  const tmpDir = tmp.dirSync({})
+  const socketFile = path.join(tmpDir.name, 'test.sock')
   fdk.__set__(defaultSetup(socketFile))
 
-  let cleanup = fdk.handle(async function (input, ctx) {
+  const cleanup = fdk.handle(async function (input, ctx) {
     ctx.responseContentType = 'text/plain'
     return fdk.streamResult(fs.createReadStream('test/testfile.txt'))
   }
@@ -385,18 +385,18 @@ test('handle streamed file', function (t) {
 })
 
 test('handle binary input', function (t) {
-  let fdk = rewire('../fn-fdk.js')
-  let tmpDir = tmp.dirSync({})
-  let socketFile = path.join(tmpDir.name, 'test.sock')
+  const fdk = rewire('../fn-fdk.js')
+  const tmpDir = tmp.dirSync({})
+  const socketFile = path.join(tmpDir.name, 'test.sock')
   fdk.__set__(defaultSetup(socketFile))
-  let binaryData = Buffer.from('450002c5939900002c06ef98adc24f6c850186d1', 'hex')
+  const binaryData = Buffer.from('450002c5939900002c06ef98adc24f6c850186d1', 'hex')
 
-  let cleanup = fdk.handle(async function (input, ctx) {
+  const cleanup = fdk.handle(async function (input, ctx) {
     ctx.responseContentType = 'application/octet-binary'
     t.equals(input.equals(binaryData), true)
     return fdk.rawResult(binaryData)
   }
-    , {inputMode: 'buffer'})
+  , { inputMode: 'buffer' })
 
   onSocketExists(socketFile)
     .then(() => {
@@ -435,14 +435,14 @@ function defaultSetup (socketFile) {
 function request (options, body) {
   return new Promise((resolve, reject) => {
     const callback = res => {
-      let body = []
+      const body = []
       res.on('data', data => {
         body.push(Buffer.from(data, 'binary'))
       }
       )
       res.on('error', reject)
       res.on('end', () => {
-        let allBody = Buffer.concat(body)
+        const allBody = Buffer.concat(body)
 
         resolve({
           resp: res,
@@ -461,7 +461,7 @@ function request (options, body) {
 }
 
 function defaultDeadline () {
-  let deadline = new Date()
+  const deadline = new Date()
   deadline.setTime(deadline.getTime() + 10000)
   return deadline
 }
@@ -484,7 +484,7 @@ function defaultRequest (socketFile) {
  * @returns {Promise}  a  that is resolved once the file exists
  */
 function onSocketExists (file) {
-  let timeout = Date.now() + 1000
+  const timeout = Date.now() + 1000
   return new Promise((resolve, reject) => {
     const interval = 100
 
