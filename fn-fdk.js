@@ -2,9 +2,9 @@
 /*
   Usage: handle(function(body, context))
 */
-let fs = require('fs')
-let http = require('http')
-let path = require('path')
+const fs = require('fs')
+const http = require('http')
+const path = require('path')
 
 const fnFunctionExceptionMessage = 'Exception in function, consult logs for details'
 
@@ -25,7 +25,7 @@ const fnFunctionExceptionMessage = 'Exception in function, consult logs for deta
  * @param options {object}
  */
 exports.handle = function (fnfunction, options) {
-  let fnFormat = process.env['FN_FORMAT'] || ''
+  const fnFormat = process.env.FN_FORMAT || ''
   let fdkHandler
 
   // format has been explicitly specified
@@ -103,7 +103,7 @@ exports.rawResult = function (res) {
  * @param error
  */
 function sendJSONError (resp, code, error) {
-  let errStr = JSON.stringify(error)
+  const errStr = JSON.stringify(error)
 
   console.warn(`Error ${code} : ${errStr}`)
   resp.setHeader('Content-type', 'application/json')
@@ -119,7 +119,7 @@ function sendJSONError (resp, code, error) {
  * @param result {*}
  */
 function sendResult (ctx, resp, result) {
-  let responseContentType = ctx.responseContentType
+  const responseContentType = ctx.responseContentType
   let isJSON = false
   if (responseContentType == null && result != null) {
     ctx.responseContentType = 'application/json'
@@ -128,9 +128,9 @@ function sendResult (ctx, resp, result) {
     isJSON = true
   }
 
-  let headers = ctx.responseHeaders
-  for (let key in headers) {
-    if (headers.hasOwnProperty(key)) {
+  const headers = ctx.responseHeaders
+  for (const key in headers) {
+    if (Object.prototype.hasOwnProperty.call(headers, key)) {
       resp.setHeader(key, headers[key])
     }
   }
@@ -156,12 +156,12 @@ function sendResult (ctx, resp, result) {
 }
 
 const skipHeaders = {
-  'TE': true,
-  'Connection': true,
+  TE: true,
+  Connection: true,
   'Keep-Alive': true,
   'Transfer-Encoding': true,
-  'Trailer': true,
-  'Upgrade': true
+  Trailer: true,
+  Upgrade: true
 }
 
 class BufferInputHandler {
@@ -225,7 +225,7 @@ function getInputHandler (inputMode) {
 
 function logFramer (ctx, fnLogframeName, fnLogframeHdr) {
   if ((fnLogframeName !== '') && (fnLogframeHdr !== '')) {
-    let id = ctx.getHeader(fnLogframeHdr)
+    const id = ctx.getHeader(fnLogframeHdr)
     if (id !== '') {
       console.log('\n' + fnLogframeName + '=' + id)
       console.error('\n' + fnLogframeName + '=' + id)
@@ -234,43 +234,43 @@ function logFramer (ctx, fnLogframeName, fnLogframeHdr) {
 }
 
 function handleHTTPStream (fnfunction, options) {
-  let listenPort = process.env['FN_LISTENER']
-  const inputMode = options != null ? (options['inputMode'] || 'json') : 'json'
+  const listenPort = process.env.FN_LISTENER
+  const inputMode = options != null ? (options.inputMode || 'json') : 'json'
 
   if (listenPort == null || !listenPort.startsWith('unix:')) {
     console.error('Invalid configuration no FN_LISTENER variable set or invalid FN_LISTENER value', +listenPort)
     process.exit(2)
   }
 
-  let listenFile = listenPort.substr('unix:'.length)
-  let listenPath = path.dirname(listenFile)
+  const listenFile = listenPort.substr('unix:'.length)
+  const listenPath = path.dirname(listenFile)
 
-  let tmpFileBaseName = path.basename(listenFile) + '.tmp'
-  let tmpFile = listenPath + '/' + tmpFileBaseName
+  const tmpFileBaseName = path.basename(listenFile) + '.tmp'
+  const tmpFile = listenPath + '/' + tmpFileBaseName
 
-  const fnLogframeName = process.env['FN_LOGFRAME_NAME'] || ''
-  const fnLogframeHdr = process.env['FN_LOGFRAME_HDR'] || ''
+  const fnLogframeName = process.env.FN_LOGFRAME_NAME || ''
+  const fnLogframeHdr = process.env.FN_LOGFRAME_HDR || ''
 
-  let functionHandler = (req, resp) => {
-    let inputHandler = getInputHandler(inputMode)
+  const functionHandler = (req, resp) => {
+    const inputHandler = getInputHandler(inputMode)
 
     if (req.method !== 'POST' || req.url !== '/call') {
-      sendJSONError(resp, 400, {message: 'Invalid method', detail: `${req.method} ${req.url}`})
+      sendJSONError(resp, 400, { message: 'Invalid method', detail: `${req.method} ${req.url}` })
       return
     }
 
     req.on('data', chunk => {
       inputHandler.pushData(chunk)
     }).on('end', () => {
-      let headers = {}
-      let rawHeaders = req.rawHeaders
+      const headers = {}
+      const rawHeaders = req.rawHeaders
       for (let i = 0; i < rawHeaders.length; i += 2) {
-        let k = canonHeader(rawHeaders[i])
+        const k = canonHeader(rawHeaders[i])
         if (skipHeaders[k]) {
           continue
         }
 
-        let v = rawHeaders[i + 1]
+        const v = rawHeaders[i + 1]
         if (headers[k] == null) {
           headers[k] = [v]
         } else {
@@ -278,8 +278,8 @@ function handleHTTPStream (fnfunction, options) {
         }
       }
 
-      let body = inputHandler.getBody()
-      let ctx = new Context(process.env, body, headers)
+      const body = inputHandler.getBody()
+      const ctx = new Context(process.env, body, headers)
       logFramer(ctx, fnLogframeName, fnLogframeHdr)
       ctx.responseContentType = 'application/json'
 
@@ -293,14 +293,14 @@ function handleHTTPStream (fnfunction, options) {
         return sendResult(ctx, resp, result)
       }, (error) => {
         console.warn('Error in function:', error)
-        sendJSONError(resp, 502, {message: fnFunctionExceptionMessage, detail: error.toString()})
+        sendJSONError(resp, 502, { message: fnFunctionExceptionMessage, detail: error.toString() })
       })
     }).on('error', (e) => {
-      sendJSONError(resp, 500, {message: 'Error sending response', detail: `${req.method} ${req.url} ${e.toString()}`})
+      sendJSONError(resp, 500, { message: 'Error sending response', detail: `${req.method} ${req.url} ${e.toString()}` })
     })
   }
 
-  let currentServer = http.createServer(functionHandler)
+  const currentServer = http.createServer(functionHandler)
   currentServer.keepAliveTimeout = 0 // turn off
   currentServer.listen(tmpFile, () => {
     fs.chmodSync(tmpFile, '666')
@@ -325,8 +325,8 @@ function handleHTTPStream (fnfunction, options) {
 function canonHeader (h) {
   return h.replace(/_/g, '-').split('-').map((h) => {
     if (h) {
-      let last = h.substr(1)
-      let first = h.substr(0, 1)
+      const last = h.substr(1)
+      const first = h.substr(0, 1)
       return first.toUpperCase() + last.toLowerCase()
     }
   }).join('-')
@@ -339,11 +339,11 @@ class HTTPGatewayContext {
    */
   constructor (ctx) {
     this.ctx = ctx
-    let _headers = {}
-    for (let key in ctx.headers) {
-      if (ctx.headers.hasOwnProperty(key)) {
+    const _headers = {}
+    for (const key in ctx.headers) {
+      if (Object.prototype.hasOwnProperty.call(ctx.headers, key)) {
         if (key.startsWith('Fn-Http-H-') && key.length > 'Fn-Http-H-'.length) {
-          let newKey = key.substr('Fn-Http-H-'.length)
+          const newKey = key.substr('Fn-Http-H-'.length)
           _headers[newKey] = ctx.headers[key]
         }
       }
@@ -372,9 +372,9 @@ class HTTPGatewayContext {
    * @returns {*}
    */
   get headers () {
-    let headers = {}
-    for (let k in this._headers) {
-      if (this._headers.hasOwnProperty(k)) {
+    const headers = {}
+    for (const k in this._headers) {
+      if (Object.prototype.hasOwnProperty.call(this._headers, k)) {
         headers[k] = new Array(this._headers[k])
       }
     }
@@ -387,7 +387,7 @@ class HTTPGatewayContext {
    * @returns {string|null}
    */
   getHeader (key) {
-    let h = this._headers[canonHeader(key)]
+    const h = this._headers[canonHeader(key)]
     if (h != null) {
       return h[0]
     }
@@ -450,7 +450,7 @@ class Context {
    * @returns {Date}
    */
   get deadline () {
-    let deadStr = this.getHeader('Fn-Deadline')
+    const deadStr = this.getHeader('Fn-Deadline')
     if (deadStr == null) {
       return null
     }
@@ -470,7 +470,7 @@ class Context {
    * @returns {string}
    */
   get appName () {
-    return this._config['FN_APP_NAME']
+    return this._config.FN_APP_NAME
   }
 
   /**
@@ -478,7 +478,7 @@ class Context {
    * @returns {string}
    */
   get appID () {
-    return this._config['FN_APP_ID']
+    return this._config.FN_APP_ID
   }
 
   /**
@@ -486,7 +486,7 @@ class Context {
    * @returns {string}
    */
   get fnID () {
-    return this._config['FN_FN_ID']
+    return this._config.FN_FN_ID
   }
 
   /**
@@ -494,7 +494,7 @@ class Context {
    * @returns {int}
    */
   get memory () {
-    return parseInt(this._config['FN_MEMORY'])
+    return parseInt(this._config.FN_MEMORY)
   }
 
   /**
@@ -502,7 +502,7 @@ class Context {
    * @returns {Object.<string,string>}
    */
   get config () {
-    let c = {}
+    const c = {}
     Object.assign(c, this._config)
     return c
   }
@@ -532,9 +532,9 @@ class Context {
    * @returns {Object.<string,Array.<string>>}
    */
   get headers () {
-    let headers = {}
-    for (let k in this._headers) {
-      if (this._headers.hasOwnProperty(k)) {
+    const headers = {}
+    for (const k in this._headers) {
+      if (Object.prototype.hasOwnProperty.call(this._headers.hasOwnProperty, k)) {
         headers[k] = new Array(this._headers[k])
       }
     }
@@ -551,7 +551,7 @@ class Context {
    * @returns {Object.<string,Array.<string>>}
    */
   get responseHeaders () {
-    let headers = {}
+    const headers = {}
     Object.assign(headers, this._responseHeaders)
     return headers
   }
@@ -562,7 +562,7 @@ class Context {
    * @returns {Array.<string>}
    */
   getAllHeaderValues (key) {
-    let v = this._headers[canonHeader(key)]
+    const v = this._headers[canonHeader(key)]
 
     if (v == null) {
       return []
@@ -577,7 +577,7 @@ class Context {
    * @returns {string|null}
    */
   getHeader (key) {
-    let h = this._headers[canonHeader(key)]
+    const h = this._headers[canonHeader(key)]
     if (h != null) {
       return h[0]
     }
@@ -600,7 +600,7 @@ class Context {
    * @returns {string|null}
    */
   getResponseHeader (key) {
-    let h = this._responseHeaders[canonHeader(key)]
+    const h = this._responseHeaders[canonHeader(key)]
     if (h != null) {
       return h[0]
     }
@@ -622,7 +622,7 @@ class Context {
    * @param values {string}
    */
   addResponseHeader (key, ...values) {
-    let ckey = canonHeader(key)
+    const ckey = canonHeader(key)
     if (this._responseHeaders[ckey] == null) {
       this._responseHeaders[ckey] = []
     }

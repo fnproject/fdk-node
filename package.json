@@ -23,10 +23,10 @@
   "license": "Apache-2.0",
   "dependencies": {},
   "devDependencies": {
-    "rewire": "4.0.1",
-    "sinon": "^7.3.2",
-    "standard": "11.0.1",
-    "tape": "^4.9.1",
-    "tmp": "0.0.33"
+    "rewire": "5.0.0",
+    "sinon": "^9.0.1",
+    "standard": "14.3.1",
+    "tape": "^4.13.2",
+    "tmp": "0.1.0"
   }
 }

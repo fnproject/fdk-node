@@ -9,4 +9,4 @@ fdk.handle(async function (buf, ctx) {
   }
   ctx.responseContentType = 'application/octet-stream'
   return fdk.rawResponse(buf)
-}, {inputMode: 'buffer'})
+}, { inputMode: 'buffer' })
