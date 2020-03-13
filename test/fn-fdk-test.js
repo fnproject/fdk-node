@@ -173,6 +173,7 @@ test('Listens and accepts request', function (t) {
         t.equals(r.body, 'done')
         t.equals(r.resp.headers['fn-http-h-my-out-header'], 'out')
         t.equals(r.resp.headers['fn-http-status'], '302')
+        t.match(r.resp.headers['fn-fdk-version'], /fdk-node\/\d+\.\d+\.\d+ \(njsv=v\d+.\d+.\d+\)/)
         t.end()
       })
     })

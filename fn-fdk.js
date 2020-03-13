@@ -5,6 +5,8 @@
 const fs = require('fs')
 const http = require('http')
 const path = require('path')
+const version = require('./package.json')
+const fdkVersion = 'fdk-node/' + version.version + ' (njsv=' + process.version + ')'
 
 const fnFunctionExceptionMessage = 'Exception in function, consult logs for details'
 
@@ -135,6 +137,7 @@ function sendResult (ctx, resp, result) {
     }
   }
   resp.removeHeader('Content-length')
+  resp.setHeader('Fn-Fdk-Version', fdkVersion)
   resp.writeHead(200, 'OK')
 
   let p
@@ -304,8 +307,10 @@ function handleHTTPStream (fnfunction, options) {
   currentServer.keepAliveTimeout = 0 // turn off
   currentServer.listen(tmpFile, () => {
     fs.chmodSync(tmpFile, '666')
+
     fs.symlinkSync(tmpFileBaseName, listenFile)
   })
+
   currentServer.on('error', (error) => {
     console.warn(`Unable to connect to unix socket ${tmpFile}`, error)
     process.exit(3)
