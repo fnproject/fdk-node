@@ -145,7 +145,11 @@ test('Listens and accepts request', function (t) {
     t.equals('fnId', ctx.fnID)
     t.equals('appId', ctx.appID)
     t.equals('h1', ctx.getHeader('my-header'))
+
     t.deepEquals(['h1', 'h2'], ctx.getAllHeaderValues('my-header'))
+    const heads = ctx.headers
+    t.deepEquals(['h1', 'h2'], heads['My-Header'])
+    t.deepEquals(['h3'], heads.Otherheader)
 
     ctx.responseContentType = 'text/plain'
 
@@ -167,7 +171,8 @@ test('Listens and accepts request', function (t) {
         headers: {
           'Fn-Call-Id': 'callId',
           'Fn-Deadline': deadline.toString(),
-          'My-Header': ['h1', 'h2']
+          'My-Header': ['h1', 'h2'],
+          otherHeader: 'h3'
         }
       }).then(r => {
         t.equals(r.body, 'done')
@@ -507,3 +512,58 @@ function onSocketExists (file) {
     setTimeout(handleInterval, interval)
   })
 }
+
+test('Handle Http input', function (t) {
+  const fdk = rewire('../fn-fdk.js')
+  const tmpDir = tmp.dirSync({})
+  const socketFile = path.join(tmpDir.name, 'test.sock')
+  fdk.__set__(defaultSetup(socketFile))
+
+  const deadline = new Date()
+  deadline.setTime(deadline.getTime() + 10000)
+
+  const cleanup = fdk.handle((input, ctx) => {
+    const z = ctx.httpGateway
+
+    t.equals('DELETE', z.method)
+    t.deepEquals({ Fooheader: ['bar', 'baz'], 'Bar-Header': ['bob'] }, z.headers)
+    t.equals('/my/url/bar?baz=bob', z.requestURL)
+
+    z.setResponseHeader('My-Out-Header', 'out')
+    z.setResponseHeader('otherHeader', 'out2')
+    z.addResponseHeader('otherHeader', 'out3')
+
+    z.statusCode = 302
+
+    return 'done'
+  })
+
+  onSocketExists(socketFile)
+    .then(() => {
+      return request({
+        socketPath: socketFile,
+        path: '/call',
+        host: 'localhost',
+        method: 'POST',
+        headers: {
+          'Fn-Call-Id': 'callId',
+          'Fn-Deadline': deadline.toString(),
+          'My-Header': ['h1', 'h2'],
+          'Fn-Intent': 'httprequest',
+          'fn-http-method': 'DELETE',
+          'Fn-Http-H-FooHeader': ['bar', 'baz'],
+          'Fn-Http-H-Bar-Header': 'bob',
+          'Fn-Http-Request-Url': '/my/url/bar?baz=bob'
+        }
+      }).then(r => {
+        t.equals(r.body, '"done"')
+        t.equals(r.resp.headers['fn-http-h-my-out-header'], 'out')
+        t.deepEquals(r.resp.headers['fn-http-h-otherheader'], 'out2, out3')
+        t.equals(r.resp.headers['fn-http-status'], '302')
+        t.end()
+      })
+    })
+    .then(cleanup)
+    .then(() => socketFile.removeCallback)
+    .catch(e => t.fail(e))
+})
