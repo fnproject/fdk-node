@@ -275,9 +275,17 @@ function handleHTTPStream (fnfunction, options) {
 
         const v = rawHeaders[i + 1]
         if (headers[k] == null) {
-          headers[k] = [v]
+          if (Array.isArray(v)) {
+            headers[k] = v.slice()
+          } else {
+            headers[k] = [v]
+          }
         } else {
-          headers[k].push(v)
+          if (Array.isArray(v)) {
+            headers[k] = headers[k].concat(v)
+          } else {
+            headers[k].push(v)
+          }
         }
       }
 
@@ -380,7 +388,7 @@ class HTTPGatewayContext {
     const headers = {}
     for (const k in this._headers) {
       if (Object.prototype.hasOwnProperty.call(this._headers, k)) {
-        headers[k] = new Array(this._headers[k])
+        headers[k] = this._headers[k].slice()
       }
     }
     return headers
@@ -539,8 +547,14 @@ class Context {
   get headers () {
     const headers = {}
     for (const k in this._headers) {
-      if (Object.prototype.hasOwnProperty.call(this._headers.hasOwnProperty, k)) {
-        headers[k] = new Array(this._headers[k])
+      if (Object.prototype.hasOwnProperty.call(this._headers, k)) {
+        let value = this._headers[k]
+        if (!Array.isArray(value)) {
+          value = new Array(value)
+        } else {
+          value = value.slice()
+        }
+        headers[k] = value
       }
     }
     return headers
