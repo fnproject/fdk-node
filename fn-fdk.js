@@ -57,7 +57,7 @@ exports.handle = function (fnfunction, options) {
       process.exit(2)
   }
 
- return fdkHandler(fnfunction, options)
+  return fdkHandler(fnfunction, options)
 }
 
 /**
@@ -466,7 +466,7 @@ class HTTPGatewayContext {
 /**
  * TraceContext defines an OCI APM tracing context for the current invocation.
  * Traces are currently defined by the Zipkin standard.
- * See: https://zipkin.io/pages/instrumenting 
+ * See: https://zipkin.io/pages/instrumenting
  */
 class TraceContext {
   constructor (ctx) {
@@ -605,7 +605,7 @@ class Context {
    * Create an OCI APM TraceContext for the current invocation.
    */
   get traceContext () {
-    return new TraceContext(this);
+    return new TraceContext(this)
   }
 
   /**
