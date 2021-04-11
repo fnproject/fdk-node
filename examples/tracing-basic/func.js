@@ -215,5 +215,5 @@ function createOCISampler (ctx) {
 function getServiceName (ctx) {
   const appName = (ctx.appName) ? ctx.appName : 'oci-fn-app'
   const fnName = (ctx.fnName) ? ctx.fnName : 'oci-fn-node-fdk'
-  return appName + ':' + fnName
+  return (appName + '::' + fnName).toLowerCase()
 }
