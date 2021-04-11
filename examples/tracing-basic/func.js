@@ -111,8 +111,6 @@ function flush () {
  * @returns       A configured Tracer for automatically tracing calls.
  */
 function createOCITracer (ctx) {
-  const serviceName = getServiceName(ctx)
-
   // An OCI APM configured Tracer
   //
   const traceCxt = ctx.traceContext
@@ -131,7 +129,7 @@ function createOCITracer (ctx) {
     defaultTags: createOCITags(ctx),
     // A custom sampling strategy can be defined.
     sampler: createOCISampler(ctx),
-    localServiceName: serviceName,
+    localServiceName: traceCxt.serviceName,
     supportsJoin: true,
     traceId128Bit: true
   })
@@ -202,18 +200,4 @@ function createOCITags (ctx) {
 function createOCISampler (ctx) {
   const traceCxt = ctx.traceContext
   return new sampler.Sampler((traceId) => traceCxt.isEnabled && !traceCxt.sampled)
-}
-
-/**
- * A helper function to define a Zipkin 'service name' based on the Application
- * and Function being invoked.
- *
- * @param {*} ctx The function invocation context.
- * @returns       A well defined service name based on the Application and
- *                Function being invoked.
- */
-function getServiceName (ctx) {
-  const appName = (ctx.appName) ? ctx.appName : 'oci-fn-app'
-  const fnName = (ctx.fnName) ? ctx.fnName : 'oci-fn-node-fdk'
-  return (appName + '::' + fnName).toLowerCase()
 }

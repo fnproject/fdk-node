@@ -397,7 +397,7 @@ class HTTPGatewayContext {
   }
 
   /**
-   * returns the HTTP headers reaceived by the gateway for this event
+   * returns the HTTP headers received by the gateway for this event
    * @returns {*}
    */
   get headers () {
@@ -477,6 +477,7 @@ class TraceContext {
     this.parentSpanId = ctx.getHeader('X-B3-ParentSpanId')
     this.sampled = parseInt(ctx.getHeader('X-B3-Sampled')) === 1
     this.flags = parseInt(ctx.getHeader('X-B3-Flags')) === 1
+    this.serviceName = (ctx.appName + '::' + ctx.fnName).toLowerCase()
   }
 }
 
