@@ -476,7 +476,7 @@ class TracingContext {
     this.spanId = ctx.getHeader('X-B3-SpanId')
     this.parentSpanId = ctx.getHeader('X-B3-ParentSpanId')
     this.sampled = parseInt(ctx.getHeader('X-B3-Sampled')) === 1
-    this.flags = parseInt(ctx.getHeader('X-B3-Flags')) === 1
+    this.flags = ctx.getHeader('X-B3-Flags')
     this.serviceName = (ctx.appName + '::' + ctx.fnName).toLowerCase()
   }
 }

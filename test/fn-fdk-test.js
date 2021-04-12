@@ -177,7 +177,7 @@ test('Listens and accepts request', function (t) {
     t.deepEquals(null, tracingCxt.spanId)
     t.deepEquals(null, tracingCxt.parentSpanId)
     t.deepEquals(false, tracingCxt.sampled)
-    t.deepEquals(false, tracingCxt.flags)
+    t.deepEquals(null, tracingCxt.flags)
     t.deepEquals('appname::fnname', tracingCxt.serviceName)
 
     ctx.responseContentType = 'text/plain'
@@ -247,7 +247,7 @@ test('Listens and accepts tracing request', function (t) {
     t.deepEquals('canned-span-id', tracingCxt.spanId)
     t.deepEquals('canned-parent-span-id', tracingCxt.parentSpanId)
     t.deepEquals(true, tracingCxt.sampled)
-    t.deepEquals(true, tracingCxt.flags)
+    t.deepEquals('1', tracingCxt.flags)
     t.deepEquals('appname::fnname', tracingCxt.serviceName)
 
     ctx.responseContentType = 'text/plain'
