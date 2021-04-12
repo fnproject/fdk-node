@@ -464,11 +464,11 @@ class HTTPGatewayContext {
 }
 
 /**
- * TraceContext defines an OCI APM tracing context for the current invocation.
+ * TracingContext defines an OCI APM tracing context for the current invocation.
  * Traces are currently defined by the Zipkin standard.
  * See: https://zipkin.io/pages/instrumenting
  */
-class TraceContext {
+class TracingContext {
   constructor (ctx) {
     this.isEnabled = parseInt(ctx._config.OCI_TRACING_ENABLED) === 1
     this.traceCollectorUrl = ctx._config.OCI_TRACE_COLLECTOR_URL
@@ -603,10 +603,10 @@ class Context {
   }
 
   /**
-   * Create an OCI APM TraceContext for the current invocation.
+   * Create an OCI APM TracingContext for the current invocation.
    */
-  get traceContext () {
-    return new TraceContext(this)
+  get tracingContext () {
+    return new TracingContext(this)
   }
 
   /**

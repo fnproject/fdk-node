@@ -169,16 +169,16 @@ test('Listens and accepts request', function (t) {
     t.deepEquals(['h1', 'h2'], heads['My-Header'])
     t.deepEquals(['h3'], heads.Otherheader)
 
-    // Should contain the 'defaultSetup'' traceContext.
-    const traceContext = ctx.traceContext
-    t.deepEquals(false, traceContext.isEnabled)
-    t.deepEquals(undefined, traceContext.traceCollectorUrl)
-    t.deepEquals(null, traceContext.traceId)
-    t.deepEquals(null, traceContext.spanId)
-    t.deepEquals(null, traceContext.parentSpanId)
-    t.deepEquals(false, traceContext.sampled)
-    t.deepEquals(false, traceContext.flags)
-    t.deepEquals('appname::fnname', traceContext.serviceName)
+    // Should contain the 'defaultSetup'' tracingContext.
+    const tracingCxt = ctx.tracingContext
+    t.deepEquals(false, tracingCxt.isEnabled)
+    t.deepEquals(undefined, tracingCxt.traceCollectorUrl)
+    t.deepEquals(null, tracingCxt.traceId)
+    t.deepEquals(null, tracingCxt.spanId)
+    t.deepEquals(null, tracingCxt.parentSpanId)
+    t.deepEquals(false, tracingCxt.sampled)
+    t.deepEquals(false, tracingCxt.flags)
+    t.deepEquals('appname::fnname', tracingCxt.serviceName)
 
     ctx.responseContentType = 'text/plain'
 
@@ -239,16 +239,16 @@ test('Listens and accepts tracing request', function (t) {
     t.deepEquals(['h1', 'h2'], heads['My-Header'])
     t.deepEquals(['h3'], heads.Otherheader)
 
-    // Should contain the 'tracingSetup' traceContext.
-    const traceContext = ctx.traceContext
-    t.deepEquals(true, traceContext.isEnabled)
-    t.deepEquals('trace-collector-url', traceContext.traceCollectorUrl)
-    t.deepEquals('canned-trace-id', traceContext.traceId)
-    t.deepEquals('canned-span-id', traceContext.spanId)
-    t.deepEquals('canned-parent-span-id', traceContext.parentSpanId)
-    t.deepEquals(true, traceContext.sampled)
-    t.deepEquals(true, traceContext.flags)
-    t.deepEquals('appname::fnname', traceContext.serviceName)
+    // Should contain the 'tracingSetup' tracingContext.
+    const tracingCxt = ctx.tracingContext
+    t.deepEquals(true, tracingCxt.isEnabled)
+    t.deepEquals('trace-collector-url', tracingCxt.traceCollectorUrl)
+    t.deepEquals('canned-trace-id', tracingCxt.traceId)
+    t.deepEquals('canned-span-id', tracingCxt.spanId)
+    t.deepEquals('canned-parent-span-id', tracingCxt.parentSpanId)
+    t.deepEquals(true, tracingCxt.sampled)
+    t.deepEquals(true, tracingCxt.flags)
+    t.deepEquals('appname::fnname', tracingCxt.serviceName)
 
     ctx.responseContentType = 'text/plain'
 

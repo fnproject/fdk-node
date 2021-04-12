@@ -113,14 +113,14 @@ function flush () {
 function createOCITracer (ctx) {
   // An OCI APM configured Tracer
   //
-  const traceCxt = ctx.traceContext
+  const tracingCxt = ctx.tracingContext
   const tracer = new Tracer({
     ctxImpl: new ExplicitContext(),
     recorder: new BatchRecorder({
       logger: new HttpLogger({
         // The configured OCI APM endpoint is available in the function
         // invocation context.
-        endpoint: traceCxt.traceCollectorUrl,
+        endpoint: tracingCxt.traceCollectorUrl,
         jsonEncoder: jsonEncoder.JSON_V2
       })
     }),
@@ -129,7 +129,7 @@ function createOCITracer (ctx) {
     defaultTags: createOCITags(ctx),
     // A custom sampling strategy can be defined.
     sampler: createOCISampler(ctx),
-    localServiceName: traceCxt.serviceName,
+    localServiceName: tracingCxt.serviceName,
     supportsJoin: true,
     traceId128Bit: true
   })
@@ -149,19 +149,19 @@ function createOCITracer (ctx) {
  * @returns       A ZipkinJS 'TraceId' created from the invocation context.
  */
 function createOCITraceId (tracer, ctx) {
-  const traceCxt = ctx.traceContext
-  if (traceCxt.traceId && traceCxt.spanId) {
+  const tracingCxt = ctx.tracingContext
+  if (tracingCxt.traceId && tracingCxt.spanId) {
     return new TraceId({
-      traceId: traceCxt.traceId,
-      spanId: traceCxt.spanId,
-      sampled: new option.Some(traceCxt.sampled),
-      debug: new option.Some(traceCxt.debug),
+      traceId: tracingCxt.traceId,
+      spanId: tracingCxt.spanId,
+      sampled: new option.Some(tracingCxt.sampled),
+      debug: new option.Some(tracingCxt.debug),
       shared: false
     })
   } else {
     return tracer.createRootId(
-      new option.Some(traceCxt.sampled),
-      new option.Some(traceCxt.debug)
+      new option.Some(tracingCxt.sampled),
+      new option.Some(tracingCxt.debug)
     )
   }
 }
@@ -191,13 +191,12 @@ function createOCITags (ctx) {
  * A ZipkinJS 'Sampler' can be created directly from the function invocation
  * context.
  *
- * This configuration will only create a trace if both the function and the
- * Zipkin Sampled header are configured for tracing.
+ * This configuration will only create a trace if the function is configured
+ * for tracing.
  *
  * @param {*} ctx The function invocation context.
  * @returns       A ZipkinJS 'TraceId' created from the invocation context.
  */
 function createOCISampler (ctx) {
-  const traceCxt = ctx.traceContext
-  return new sampler.Sampler((traceId) => traceCxt.isEnabled && !traceCxt.sampled)
+  return new sampler.Sampler((traceId) => ctx.tracingContext.isEnabled)
 }
