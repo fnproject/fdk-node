@@ -1,0 +1,14 @@
+{
+	"name": "apm-tracing-node-fdk-simple-trace",
+	"version": "1.0.0",
+	"description": "Example APM tracing function.",
+	"main": "func.js",
+	"author": "",
+	"license": "Apache-2.0",
+	"dependencies": {
+		"@fnproject/fdk": ">=0.0.13",
+		"node-fetch": "^2.6.1",
+		"zipkin": "^0.22.0",
+		"zipkin-transport-http": "^0.22.0"
+	}
+}

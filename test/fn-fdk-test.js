@@ -160,12 +160,25 @@ test('Listens and accepts request', function (t) {
     t.equals(deadline.toString(), ctx.deadline.toString())
     t.equals('fnId', ctx.fnID)
     t.equals('appId', ctx.appID)
+    t.equals('fnName', ctx.fnName)
+    t.equals('appName', ctx.appName)
     t.equals('h1', ctx.getHeader('my-header'))
 
     t.deepEquals(['h1', 'h2'], ctx.getAllHeaderValues('my-header'))
     const heads = ctx.headers
     t.deepEquals(['h1', 'h2'], heads['My-Header'])
     t.deepEquals(['h3'], heads.Otherheader)
+
+    // Should contain the 'defaultSetup'' tracingContext.
+    const tracingCxt = ctx.tracingContext
+    t.deepEquals(false, tracingCxt.isEnabled)
+    t.deepEquals(undefined, tracingCxt.traceCollectorUrl)
+    t.deepEquals(null, tracingCxt.traceId)
+    t.deepEquals(null, tracingCxt.spanId)
+    t.deepEquals(null, tracingCxt.parentSpanId)
+    t.deepEquals(false, tracingCxt.sampled)
+    t.deepEquals(null, tracingCxt.flags)
+    t.deepEquals('appname::fnname', tracingCxt.serviceName)
 
     ctx.responseContentType = 'text/plain'
 
@@ -189,6 +202,83 @@ test('Listens and accepts request', function (t) {
           'Fn-Deadline': deadline.toString(),
           'My-Header': ['h1', 'h2'],
           otherHeader: 'h3'
+        }
+      }).then(r => {
+        t.equals(r.body, 'done')
+        t.equals(r.resp.headers['fn-http-h-my-out-header'], 'out')
+        t.equals(r.resp.headers['fn-http-status'], '302')
+        t.match(r.resp.headers['fn-fdk-version'], /fdk-node\/\d+\.\d+\.\d+ \(njsv=v\d+.\d+.\d+\)/)
+        t.end()
+      })
+    })
+    .then(cleanup)
+    .then(() => socketFile.removeCallback)
+    .catch(e => t.fail(e))
+})
+
+test('Listens and accepts tracing request', function (t) {
+  const fdk = rewire('../fn-fdk.js')
+  const tmpDir = tmp.dirSync({})
+  const socketFile = path.join(tmpDir.name, 'test.sock')
+  fdk.__set__(tracingSetup(socketFile))
+
+  const deadline = new Date()
+  deadline.setTime(deadline.getTime() + 10000)
+
+  const cleanup = fdk.handle((input, ctx) => {
+    t.equals('callId', ctx.callID)
+    t.equals(deadline.toString(), ctx.deadline.toString())
+    t.equals('fnId', ctx.fnID)
+    t.equals('appId', ctx.appID)
+    t.equals('fnName', ctx.fnName)
+    t.equals('appName', ctx.appName)
+    t.equals('h1', ctx.getHeader('my-header'))
+
+    t.deepEquals(['h1', 'h2'], ctx.getAllHeaderValues('my-header'))
+    const heads = ctx.headers
+    t.deepEquals(['h1', 'h2'], heads['My-Header'])
+    t.deepEquals(['h3'], heads.Otherheader)
+
+    // Should contain the 'tracingSetup' tracingContext.
+    const tracingCxt = ctx.tracingContext
+    t.deepEquals(true, tracingCxt.isEnabled)
+    t.deepEquals('trace-collector-url', tracingCxt.traceCollectorUrl)
+    t.deepEquals('canned-trace-id', tracingCxt.traceId)
+    t.deepEquals('canned-span-id', tracingCxt.spanId)
+    t.deepEquals('canned-parent-span-id', tracingCxt.parentSpanId)
+    t.deepEquals(true, tracingCxt.sampled)
+    t.deepEquals('1', tracingCxt.flags)
+    t.deepEquals('appname::fnname', tracingCxt.serviceName)
+
+    ctx.responseContentType = 'text/plain'
+
+    const z = ctx.httpGateway
+
+    z.setResponseHeader('My-Out-Header', 'out')
+    z.statusCode = 302
+
+    return 'done'
+  })
+
+  onSocketExists(socketFile)
+    .then(() => {
+      return request({
+        socketPath: socketFile,
+        path: '/call',
+        host: 'localhost',
+        method: 'POST',
+        headers: {
+          'Fn-Call-Id': 'callId',
+          'Fn-Deadline': deadline.toString(),
+          'My-Header': ['h1', 'h2'],
+          otherHeader: 'h3',
+          // Test canned tracing headers
+          'X-B3-TraceId': 'canned-trace-id',
+          'X-B3-SpanId': 'canned-span-id',
+          'X-B3-ParentSpanId': 'canned-parent-span-id',
+          'X-B3-Sampled': '1',
+          'X-B3-Flags': '1'
+
         }
       }).then(r => {
         t.equals(r.body, 'done')
@@ -442,7 +532,30 @@ function defaultSetup (socketFile) {
         FN_LISTENER: 'unix:' + socketFile,
         FN_MEMORY: '128',
         FN_FN_ID: 'fnId',
-        FN_APP_ID: 'appId'
+        FN_APP_ID: 'appId',
+        FN_FN_NAME: 'fnName',
+        FN_APP_NAME: 'appName'
+      },
+      exit: function () {
+        throw new Error('got exit')
+      }
+    }
+  }
+}
+
+function tracingSetup (socketFile) {
+  return {
+    process: {
+      env: {
+        FN_FORMAT: 'http-stream',
+        FN_LISTENER: 'unix:' + socketFile,
+        FN_MEMORY: '128',
+        FN_FN_ID: 'fnId',
+        FN_APP_ID: 'appId',
+        FN_FN_NAME: 'fnName',
+        FN_APP_NAME: 'appName',
+        OCI_TRACING_ENABLED: '1',
+        OCI_TRACE_COLLECTOR_URL: 'trace-collector-url'
       },
       exit: function () {
         throw new Error('got exit')

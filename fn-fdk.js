@@ -397,7 +397,7 @@ class HTTPGatewayContext {
   }
 
   /**
-   * returns the HTTP headers reaceived by the gateway for this event
+   * returns the HTTP headers received by the gateway for this event
    * @returns {*}
    */
   get headers () {
@@ -464,6 +464,24 @@ class HTTPGatewayContext {
 }
 
 /**
+ * TracingContext defines an OCI APM tracing context for the current invocation.
+ * Traces are currently defined by the Zipkin standard.
+ * See: https://zipkin.io/pages/instrumenting
+ */
+class TracingContext {
+  constructor (ctx) {
+    this.isEnabled = parseInt(ctx._config.OCI_TRACING_ENABLED) === 1
+    this.traceCollectorUrl = ctx._config.OCI_TRACE_COLLECTOR_URL
+    this.traceId = ctx.getHeader('X-B3-TraceId')
+    this.spanId = ctx.getHeader('X-B3-SpanId')
+    this.parentSpanId = ctx.getHeader('X-B3-ParentSpanId')
+    this.sampled = parseInt(ctx.getHeader('X-B3-Sampled')) === 1
+    this.flags = ctx.getHeader('X-B3-Flags')
+    this.serviceName = (ctx.appName + '::' + ctx.fnName).toLowerCase()
+  }
+}
+
+/**
  * Context is the function invocation context - it enables functions to read and write metadata from the request including event headers, config and the underlying payload
  */
 class Context {
@@ -475,7 +493,7 @@ class Context {
   }
 
   /**
-   * Returns the deadline for the funciton invocation as a Date object
+   * Returns the deadline for the function invocation as a Date object
    * @returns {Date}
    */
   get deadline () {
@@ -495,7 +513,7 @@ class Context {
   }
 
   /**
-   * Returns the application  name associated with this function
+   * Returns the application name associated with this function
    * @returns {string}
    */
   get appName () {
@@ -508,6 +526,14 @@ class Context {
    */
   get appID () {
     return this._config.FN_APP_ID
+  }
+
+  /**
+   * Returns the function name associated with this function
+   * @returns {string}
+   */
+  get fnName () {
+    return this._config.FN_FN_NAME
   }
 
   /**
@@ -574,6 +600,13 @@ class Context {
       }
     }
     return headers
+  }
+
+  /**
+   * Create an OCI APM TracingContext for the current invocation.
+   */
+  get tracingContext () {
+    return new TracingContext(this)
   }
 
   /**
