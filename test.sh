@@ -17,5 +17,5 @@
 
 set -ex
 
-docker run --rm -it -v $PWD:/mypkg -w /mypkg node:11-alpine npm install
-docker run --rm -it -v $PWD:/mypkg -w /mypkg node:11-alpine npm run test
+docker run --rm -it -v $PWD:/mypkg -w /mypkg node:9-alpine npm install
+docker run --rm -it -v $PWD:/mypkg -w /mypkg node:9-alpine npm run test
