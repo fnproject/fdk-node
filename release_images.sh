@@ -20,6 +20,6 @@ user="fnproject"
 image="node"
 
 node_version=$1
-docker push ${user}/${image}:${runtime}
-docker push ${user}/${image}:${runtime}-dev
+docker push ${user}/${image}:${node_version}
+docker push ${user}/${image}:${node_version}-dev
 
