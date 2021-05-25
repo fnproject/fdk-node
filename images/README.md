@@ -1,55 +1,25 @@
-Image on Docker Hub: https://hub.docker.com/r/fnproject/python
+Image on Docker Hub: https://hub.docker.com/r/fnproject/node
 
-## Building Python images
+## Building Node images
 
 ```sh
-pushd build-stage/3.6; docker build -t fnproject/python:3.6-dev .; popd
-pushd runtime/3.6; docker build -t fnproject/python:3.6 .; popd
+pushd build-stage/11; docker build -t fnproject/node:11-dev .; popd
+pushd runtime/11; docker build -t fnproject/node:11 .; popd
 ```
 
 ```sh
-pushd build-stage/3.7.1; docker build -t fnproject/python:3.7.1-dev .; popd
-pushd runtime/3.7.1; docker build -t fnproject/python:3.7.1 .; popd
-```
-
-```sh
-pushd build-stage/3.7; docker build -t fnproject/python:3.7-dev .; popd
-pushd runtime/3.7; docker build -t fnproject/python:3.7 .; popd
-```
-
-```sh
-pushd build-stage/3.8.5; docker build -t fnproject/python:3.8.5-dev .; popd
-pushd runtime/3.8.5; docker build -t fnproject/python:3.8.5 .; popd
-```
-
-```sh
-pushd build-stage/3.8; docker build -t fnproject/python:3.8-dev .; popd
-pushd runtime/3.8; docker build -t fnproject/python:3.8 .; popd
+pushd build-stage/14; docker build -t fnproject/node:14-dev .; popd
+pushd runtime/14; docker build -t fnproject/node:14 .; popd
 ```
 
 Then push:
 
 ```sh
-docker push fnproject/python:3.6-dev
-docker push fnproject/python:3.6
+docker push fnproject/node:11-dev
+docker push fnproject/node:11
 ```
 
 ```sh
-docker push fnproject/python:3.7.1-dev
-docker push fnproject/python:3.7.1
-```
-
-```sh
-docker push fnproject/python:3.7-dev
-docker push fnproject/python:3.7
-```
-
-```sh
-docker push fnproject/python:3.8.5-dev
-docker push fnproject/python:3.8.5
-```
-
-```sh
-docker push fnproject/python:3.8-dev
-docker push fnproject/python:3.8
+docker push fnproject/node:14-dev
+docker push fnproject/node:14
 ```
