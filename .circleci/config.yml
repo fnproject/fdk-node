@@ -1,7 +1,6 @@
 version: 2
 jobs:
   build:
-    machine: true
     working_directory: ~/go/src/github.com/fnproject/fdk-node
     docker:
       - image: circleci/node:9
