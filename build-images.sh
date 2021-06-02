@@ -27,6 +27,6 @@ pushd images/build-stage/${node_version} && docker build -t ${user}/${image}:${n
 pushd images/runtime/${node_version} && docker build -t ${user}/${image}:${node_version} . && popd
 
 docker image ls
-
+cat /home/circleci/.docker/config.json
 docker push ${user}/${image}:${node_version}-dev
 docker push ${user}/${image}:${node_version}
