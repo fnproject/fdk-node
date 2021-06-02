@@ -29,3 +29,6 @@ node_version=$1
 
 pushd images/build-stage/${node_version} && docker build -t ${user}/${image}:${node_version}-dev . && popd
 pushd images/runtime/${node_version} && docker build -t ${user}/${image}:${node_version} . && popd
+
+docker push ${user}/${image}:${node_version}-dev
+docker push ${user}/${image}:${node_version}
