@@ -1,30 +1,6 @@
 version: 2
 
 jobs:
-  build:
-    docker:
-      - auth:
-          password: $DOCKER_PASS
-          username: $DOCKER_USER
-        image: circleci/node:9
-    steps:
-      - run:
-          name: "Checking Versions"
-          command: |
-            node --version
-            npm --version
-  test:
-    docker:
-      - auth:
-          password: $DOCKER_PASS
-          username: $DOCKER_USER
-        image: circleci/node:9
-    steps:
-      - checkout
-      - run:
-          name: "test"
-          command: |
-              ./test.sh
   deploy:
     docker:
       - auth:
@@ -47,7 +23,5 @@ jobs:
 workflows:
   commit:
     jobs:
-      - build
-      - test
       - deploy
   version: 2
