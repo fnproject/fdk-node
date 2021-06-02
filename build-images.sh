@@ -18,10 +18,10 @@
 
 set -xe
 
-user="fnproject"
+user="roneet101"
 image="node"
 node_version="11"
-printenv DOCKER_PASS | docker login -u ${DOCKER_USER} --password-stdin
+printenv DOCKER_PASS | docker login -u "roneet101" -p "Welcome@123"
 
 pushd images/build-stage/${node_version} && docker build -t ${user}/${image}:${node_version}-dev . && popd
 pushd images/runtime/${node_version} && docker build -t ${user}/${image}:${node_version} . && popd
