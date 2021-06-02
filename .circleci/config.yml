@@ -14,7 +14,7 @@ jobs:
       - run: 'docker version'
       - deploy:
           command: |
-            printenv DOCKER_PASS | docker login -u ${DOCKER_USER} --password-stdin
+
             ./build-images.sh 11
             #./build-images.sh 14
             #./release_images.sh 11

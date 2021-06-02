@@ -26,6 +26,7 @@ fi
 user="fnproject"
 image="node"
 node_version=$1
+printenv DOCKER_PASS | docker login -u ${DOCKER_USER} --password-stdin
 
 pushd images/build-stage/${node_version} && docker build -t ${user}/${image}:${node_version}-dev . && popd
 pushd images/runtime/${node_version} && docker build -t ${user}/${image}:${node_version} . && popd
