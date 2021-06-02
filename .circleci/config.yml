@@ -1,17 +1,18 @@
+version: 2
+
 jobs:
   build:
     docker:
       - auth:
           password: $DOCKER_PASS
           username: $DOCKER_USER
-        image: circleci/node:9
+        image: image: circleci/node:9
     steps:
-      - checkout
       - run:
-        name: "Checking Versions"
-        command: |
-          node --version
-          npm --version
+          name: "Checking Versions"
+          command: |
+            node --version
+            npm --version
   test:
     docker:
       - auth:
