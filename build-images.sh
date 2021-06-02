@@ -18,14 +18,9 @@
 
 set -xe
 
-if [ -z "$1" ];then
-  echo "Please supply node version as argument to build image." >> /dev/stderr
-  exit 2
-fi
-
 user="fnproject"
 image="node"
-node_version=$1
+node_version="11"
 printenv DOCKER_PASS | docker login -u ${DOCKER_USER} --password-stdin
 
 pushd images/build-stage/${node_version} && docker build -t ${user}/${image}:${node_version}-dev . && popd
