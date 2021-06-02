@@ -6,7 +6,7 @@ jobs:
       - auth:
           password: $DOCKER_PASS
           username: $DOCKER_USER
-        image: image: circleci/node:9
+        image: circleci/node:9
     steps:
       - run:
           name: "Checking Versions"
