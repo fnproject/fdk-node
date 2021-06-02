@@ -17,11 +17,6 @@ jobs:
           command: |
               ./test.sh
       - run:
-          name: Build Docker images
-          command: |
-              ./build-images.sh 11
-              ./build-images.sh 14
-      - run:
          name: Login to Docker
          command: |
            if [[ "${CIRCLE_BRANCH}" == "master" && -z "${CIRCLE_PR_REPONAME}" ]]; then
@@ -36,8 +31,12 @@ jobs:
               git config --global user.email "ci@fnproject.com"
               git config --global user.name "CI"
               git branch --set-upstream-to=origin/${CIRCLE_BRANCH} ${CIRCLE_BRANCH}
+              ./build-images.sh 11
+              ./build-images.sh 14
+
               ./release_images.sh 11
               ./release_images.sh 14
+
               echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
               ./release.sh
               rm -f .npmrc
