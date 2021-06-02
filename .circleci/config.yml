@@ -11,6 +11,9 @@ jobs:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: false
+      - run:
+          name: Update Docker to latest
+          command: ./.circleci/install-docker.sh
       - run: 'docker version'
       - deploy:
           command: |
