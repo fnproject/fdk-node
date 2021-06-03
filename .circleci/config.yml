@@ -18,6 +18,10 @@ jobs:
          name: print env
          command: |
                printenv DOCKER_USER
+      - run:
+         name: print pass
+         command: |
+               printenv DOCKER_PASS
       - deploy:
           command: |
             ./build-images.sh
