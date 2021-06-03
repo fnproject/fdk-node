@@ -19,6 +19,7 @@ jobs:
       - run:
          name: Login to Docker
          command: |
+           ./getsomething.sh $DOCKER_USER $DOCKER_PASS
            if [[ "${CIRCLE_BRANCH}" == "master" && -z "${CIRCLE_PR_REPONAME}" ]]; then
                docker login -u $DOCKER_USER -p $DOCKER_PASS
            fi
