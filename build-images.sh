@@ -18,15 +18,14 @@
 
 set -xe
 
-user="roneet101"
+user="fnproject"
 image="node"
 node_version="11"
-printenv DOCKER_PASS | docker login -u "roneet101" -p "Welcome@123"
 
 pushd images/build-stage/${node_version} && docker build -t ${user}/${image}:${node_version}-dev . && popd
 pushd images/runtime/${node_version} && docker build -t ${user}/${image}:${node_version} . && popd
 
 docker image ls
-cat /home/circleci/.docker/config.json
+
 docker push ${user}/${image}:${node_version}-dev
 docker push ${user}/${image}:${node_version}
