@@ -1,0 +1,6 @@
+launch.json
+.idea
+.iml
+example/node_modules
+node_modules
+.npmrc

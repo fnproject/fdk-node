@@ -1,0 +1,43 @@
+version: 2
+jobs:
+  build:
+    machine: true
+    working_directory: ~/go/src/github.com/fnproject/fdk-node
+    # docker:
+    #   - image: node:9
+    steps:
+      - run:
+          name: "Checking Versions"
+          command: |
+            node --version
+            npm --version
+      - checkout
+      - run:
+          name: "test"
+          command: |
+              ./test.sh
+      - run:
+         name: Login to Docker
+         command: |
+           if [[ "${CIRCLE_BRANCH}" == "master" && -z "${CIRCLE_PR_REPONAME}" ]]; then
+               docker login -u $DOCKER_USER -p $DOCKER_PASS
+           fi
+      # TODO: run npm test
+      - deploy:
+          command: |
+            if [[ "${CIRCLE_BRANCH}" == "master" && -z "${CIRCLE_PR_REPONAME}" ]]; then
+              # todo: login to npm
+              printenv DOCKER_PASS | docker login -u ${DOCKER_USER} --password-stdin
+              git config --global user.email "ci@fnproject.com"
+              git config --global user.name "CI"
+              git branch --set-upstream-to=origin/${CIRCLE_BRANCH} ${CIRCLE_BRANCH}
+              ./build-images.sh 11
+              ./build-images.sh 14
+
+              ./release_images.sh 11
+              ./release_images.sh 14
+
+              echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
+              ./release.sh
+              rm -f .npmrc
+            fi
