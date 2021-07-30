@@ -1,0 +1,19 @@
+ARG NODE_VERSION=latest
+FROM fnproject/node:${NODE_VERSION}-dev as build-stage
+ARG PKG_VERSION="1.0.0-SNAPSHOT"
+WORKDIR /function
+RUN echo $'registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm \n@types:registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm \nstrict-ssl=false'> ~/.npmrc
+COPY fnproject-fdk-${PKG_VERSION}.tgz /function/
+ADD package.json /function/
+RUN ls -al
+RUN npm install fnproject-fdk-${PKG_VERSION}.tgz
+RUN npm install
+FROM fnproject/node:${NODE_VERSION}
+ARG PKG_VERSION="1.0.0-SNAPSHOT"
+WORKDIR /function
+ADD . /function/
+RUN ls -ltr
+RUN rm -rf fnproject-fdk-${PKG_VERSION}.tgz Dockerfile
+COPY --from=build-stage /function/node_modules/ /function/node_modules/
+RUN chmod -R o+r /function
+ENTRYPOINT ["node", "func.js"]

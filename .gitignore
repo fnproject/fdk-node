@@ -4,3 +4,4 @@ launch.json
 example/node_modules
 node_modules
 .npmrc
+*.tgz
