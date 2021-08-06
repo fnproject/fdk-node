@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # Copyright (c) 2019, 2020 Oracle and/or its affiliates. All rights reserved.
 #
@@ -13,9 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Docker for creating container to run unit tests
-#
 
-FROM docker-remote.artifactory.oci.oraclecorp.com/node:14.17.0-alpine
-RUN apk add --no-cache wget curl alpine-sdk bash
-RUN echo $'registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm \n@types:registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm \nstrict-ssl=false'> ~/.npmrc
+set -xe
+
+if [ -z "$1" ];then
+  echo "Please supply node runtime version as argument to release image." >> /dev/stderr
+  exit 2
+fi
+
+node_version=$1
+user="fnproject"
+image="node"
+
+echo "Pushing release images for Node Runtime Version ${node_version}"
+
+docker push ${user}/${image}:${node_version}
+docker push ${user}/${image}:${node_version}-dev

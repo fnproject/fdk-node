@@ -16,7 +16,7 @@ export LOCAL
 
 (
   # build npm package
-  docker build -t fdk_npm_pkg_build_image -f ./internal/docker-files/Dockerfile_fdk_npm_pkg_build --build-arg BUILD_VERSION=${BUILD_VERSION} .
+  docker build -t fdk_npm_pkg_build_image -f ./internal/docker-files/Dockerfile_fdk_node_npm_pkg_build .
   docker run --rm -v $PWD:/build -w /build --env BUILD_VERSION=${BUILD_VERSION} fdk_npm_pkg_build_image ./internal/build-scripts/build_fdk_npm_pkg.sh
 )
 

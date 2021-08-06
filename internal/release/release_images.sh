@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # Copyright (c) 2019, 2020 Oracle and/or its affiliates. All rights reserved.
 #
@@ -14,11 +15,23 @@
 # limitations under the License.
 #
 
-# Docker for creating container to run unit tests
+set -ex
 
-FROM docker-remote.artifactory.oci.oraclecorp.com/node:9-alpine
-RUN apk add --no-cache wget curl alpine-sdk bash
-RUN mkdir  /build
-COPY . /build
-WORKDIR /build
-RUN echo $'registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm \n@types:registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm \nstrict-ssl=false'> ~/.npmrc
+if [[ "$BUILD_VERSION" == *"SNAPSHOT"* ]]; then
+  echo "Releases will not be performed for snapshot versions, aborting."
+  exit 0
+fi
+
+RUN_TYPE=${RUN_TYPE:-dry-run}
+export RUN_TYPE
+
+# Deploying images to dockerhub
+if [ "${RUN_TYPE}" = "release" ]; then
+  # Release base fdk build and runtime images
+  echo "Deploying fdk node build and runtime images to dockerhub."
+  set +x
+  echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
+  set -x
+  ./internal/release/release_image.sh 11
+  ./internal/release/release_image.sh 14
+fi

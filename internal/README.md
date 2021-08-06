@@ -8,11 +8,14 @@ test images of functions and pushes them to OCIR.
     -   fdk node npm package. It is a tarball file in the format of fnproject-fdk-*.tar.gz
     -   Base images for fdk build and runtime
     -   Build and push test function images to OCIR.
--   internal/docker_files - Contains dockerfiles to support the building of node runtime images
-    needed for execution of unit tests and building fdk node npm package.
+-   internal/docker_files - Contains dockerfiles to support the building of node runtime images for following
+    -   Execution of unit tests
+    -   Building fdk node npm package
+    -   Update npm version of fdk node package for release
 -   internal/images - Contains dockerfiles to support the building of base fdk build and runtime images.    
 -   internal/tests-images - Contains source code of test functions for different node runtime versions.
 -   internal/cache_node_images - This script pulls node images from docker hub and caches them in artifactory.
+-   internal/release - Contains scripts to support version update of fdk node package and release docker artifacts to remote repository.
 
 
 ## Steps to generate the test function images and push them to OCIR

@@ -3,7 +3,9 @@
 set -ex
 
 # Login to OCIR
+set +x
 echo ${OCIR_PASSWORD} | docker login --username "${OCIR_USERNAME}" --password-stdin ${OCIR_REGION}
+set -x
 
 # Build and push the test function images to OCIR for integration test framework.
 

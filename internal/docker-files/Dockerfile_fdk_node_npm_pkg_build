@@ -1,0 +1,23 @@
+#
+# Copyright (c) 2019, 2020 Oracle and/or its affiliates. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Docker for creating container to build fdk npm package
+
+FROM docker-remote.artifactory.oci.oraclecorp.com/node:14.17.0-alpine
+RUN apk add --no-cache wget curl alpine-sdk bash
+RUN echo $'registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm \n@types:registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm \nstrict-ssl=false'> ~/.npmrc
+# The above line sets the npm registry to point to the oci artifactory repo in the .npmrc file. Since by default it would point to the public npm repo ie https://registry.npmjs.org. Public npm repos are not accessible over oracle network .
+# Hence in order to access any npm package the registry needs to be pointed to repo in oci artifactory. OCI Artifactory/global-release-npm repo acts as a proxy for the public npm repo.
