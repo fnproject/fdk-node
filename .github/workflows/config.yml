@@ -1,0 +1,24 @@
+name: Publish @fnproject/fdk npm Package
+on:
+  push:
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14.17.0'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm --version
+      - run: node -v
+      - run: npm install
+      - run: git status
+      - run: ls -al
+      - run: npm publish --dry-run=true
+      - name: Publish Package to npm registry if branch is master
+        if: ${{ github.ref == 'refs/heads/master'}}
+        run: npm publish --dry-run=true # TODO - REMOVE dry run flag
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
