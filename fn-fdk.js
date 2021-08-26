@@ -22,7 +22,9 @@ const fs = require('fs')
 const http = require('http')
 const path = require('path')
 const version = require('./package.json')
-const fdkVersion = 'fdk-node/' + version.version + ' (njsv=' + process.version + ')'
+const runtimeVersion = process.version
+const fdkVersion = 'fdk-node/' + version.version + ' (njsv=' + runtimeVersion + ')'
+const runtimeTag = 'node/' + runtimeVersion.substr(1, runtimeVersion.length - 1)
 
 const fnFunctionExceptionMessage = 'Exception in function, consult logs for details'
 
@@ -154,6 +156,7 @@ function sendResult (ctx, resp, result) {
   }
   resp.removeHeader('Content-length')
   resp.setHeader('Fn-Fdk-Version', fdkVersion)
+  resp.setHeader('Fn-Fdk-Runtime', runtimeTag)
   resp.writeHead(200, 'OK')
 
   let p
