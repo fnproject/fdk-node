@@ -16,5 +16,5 @@
 
 # Docker for creating container to update version of fdk node package
 
-FROM docker-remote.artifactory.oci.oraclecorp.com/node:14.17.0-alpine
+FROM docker-remote.artifactory.oci.oraclecorp.com/node:14.17.6-alpine
 RUN apk add --no-cache wget curl alpine-sdk bash

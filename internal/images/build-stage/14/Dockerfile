@@ -14,4 +14,4 @@
 # limitations under the License.
 #
 
-FROM docker-remote.artifactory.oci.oraclecorp.com/node:14.17.0-alpine
+FROM docker-remote.artifactory.oci.oraclecorp.com/node:14.17.6-alpine
