@@ -14,4 +14,4 @@
 # limitations under the License.
 #
 
-FROM node:14.17.0-alpine
+FROM node:14.17.6-alpine
