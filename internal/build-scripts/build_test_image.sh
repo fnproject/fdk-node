@@ -25,7 +25,7 @@ node_version=$2
   version="$(awk '/^runtime:/ { print $2 }' func.yaml)"
   image_identifier="${version}-${BUILD_VERSION}"
 
-  docker build -t fnproject/${name}:${image_identifier} -f Dockerfile --build-arg NODE_VERSION=${node_version} --build-arg PKG_VERSION=${BUILD_VERSION} .
+  docker build -t fnproject/${name}:${image_identifier} -f Build_file --build-arg NODE_VERSION=${node_version} --build-arg PKG_VERSION=${BUILD_VERSION} .
 
   # Remove the locally built npm package from the function directory.
   rm -rf fnproject-fdk-${BUILD_VERSION}.tgz

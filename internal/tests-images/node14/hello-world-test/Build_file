@@ -12,7 +12,7 @@ ARG PKG_VERSION="1.0.0-SNAPSHOT"
 WORKDIR /function
 ADD . /function/
 RUN ls -ltr
-RUN rm -rf fnproject-fdk-${PKG_VERSION}.tgz Dockerfile
+RUN rm -rf fnproject-fdk-${PKG_VERSION}.tgz Build_file
 COPY --from=build-stage /function/node_modules/ /function/node_modules/
 RUN chmod -R o+r /function
 ENTRYPOINT ["node", "func.js"]
