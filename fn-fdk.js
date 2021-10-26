@@ -22,7 +22,7 @@ const fs = require('fs')
 const http = require('http')
 const path = require('path')
 const version = require('./package.json')
-const runtimeVersion = process.version
+const runtimeVersion = String(process.version)
 const fdkVersion = 'fdk-node/' + version.version + ' (njsv=' + runtimeVersion + ')'
 const runtimeTag = 'node/' + runtimeVersion.substr(1, runtimeVersion.length - 1)
 
