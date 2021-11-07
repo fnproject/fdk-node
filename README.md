@@ -8,10 +8,10 @@ It currently supports default (cold) and hot functions using the JSON format.
 Writing a Node.js function is simply a matter of writing a handler function
 that you pass to the FDK to invoke each time your function is called.
 
-Start the Fn Server:
+Open a new terminal and start the Fn Server:
 
 ```sh
-fn start
+fn start -d
 ```
 
 Create a new app:
