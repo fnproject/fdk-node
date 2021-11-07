@@ -8,7 +8,19 @@ It currently supports default (cold) and hot functions using the JSON format.
 Writing a Node.js function is simply a matter of writing a handler function
 that you pass to the FDK to invoke each time your function is called.
 
-Start by creating a node function with `fn init` and installing the FDK:
+Start the Fn Server:
+
+```sh
+fn start
+```
+
+Create a new app:
+
+```sh
+fn create app fdkdemo
+```
+
+Create a node function with `fn init` and installing the FDK:
 
 ```sh
 fn init --runtime node nodefunc
