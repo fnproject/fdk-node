@@ -28,5 +28,5 @@ image="node"
 
 echo "Pushing release images for Node Runtime Version ${node_version}"
 
-docker push ${user}/${image}:${node_version}
-docker push ${user}/${image}:${node_version}-dev
+docker push ${user}/${image}:${node_version}-alpine
+docker push ${user}/${image}:${node_version}-alpine-dev

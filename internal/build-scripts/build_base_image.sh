@@ -27,5 +27,5 @@ user="fnproject"
 image="node"
 node_version=$1
 
-pushd internal/images/build-stage/${node_version} && docker build -t ${user}/${image}:${node_version}-dev . && popd
-pushd internal/images/runtime/${node_version} && docker build -t ${user}/${image}:${node_version} . && popd
+pushd internal/images/build-stage/${node_version} && docker build -t ${user}/${image}:${node_version}-alpine-dev . && popd
+pushd internal/images/runtime/${node_version} && docker build -t ${user}/${image}:${node_version}-alpine . && popd
