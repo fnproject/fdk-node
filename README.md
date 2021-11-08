@@ -30,9 +30,9 @@ fdk.handle(function(input){
   let name = 'World';
   if (input.name) {
     name = input.name;
-  }
+  };
   return {'message': 'Hello ' + name}
-})
+});
 ```
 
 The handler function takes the string input that is sent to the function
