@@ -16,5 +16,12 @@
 
 # Docker for creating container to update version of fdk node package
 
-FROM docker-remote.artifactory.oci.oraclecorp.com/node:14.17.6-alpine
-RUN apk add --no-cache wget curl alpine-sdk bash
+FROM docker-remote.artifactory.oci.oraclecorp.com/oraclelinux:8-slim
+
+RUN microdnf module enable nodejs:14 && \
+    microdnf install nodejs npm && \
+    microdnf module reset nodejs:14 && \
+    microdnf clean all
+
+CMD ["node"]
+

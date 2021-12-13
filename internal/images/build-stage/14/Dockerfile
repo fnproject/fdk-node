@@ -14,4 +14,12 @@
 # limitations under the License.
 #
 
-FROM docker-remote.artifactory.oci.oraclecorp.com/node:14.17.6-alpine
+FROM docker-remote.artifactory.oci.oraclecorp.com/oraclelinux:8-slim
+
+RUN microdnf module enable nodejs:14 && \
+    microdnf install nodejs npm && \
+    microdnf module reset nodejs:14 && \
+    microdnf clean all
+
+CMD ["node"]
+
