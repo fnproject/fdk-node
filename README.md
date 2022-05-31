@@ -8,7 +8,13 @@ It currently supports default (cold) and hot functions using the JSON format.
 Writing a Node.js function is simply a matter of writing a handler function
 that you pass to the FDK to invoke each time your function is called.
 
-Start by creating a node function with `fn init` and installing the FDK:
+Open a new terminal and start the Fn Server:
+
+```sh
+fn start -d
+```
+
+Start by creating a node function with fn init and installing the FDK:
 
 ```sh
 fn init --runtime node nodefunc
@@ -24,9 +30,9 @@ fdk.handle(function(input){
   let name = 'World';
   if (input.name) {
     name = input.name;
-  }
+  };
   return {'message': 'Hello ' + name}
-})
+});
 ```
 
 The handler function takes the string input that is sent to the function
@@ -34,20 +40,29 @@ and returns a response string.  Using the FDK you don't have to worry about read
 input from standard input and writing to standard output to return your response.
 The FDK let's you focus on your function logic and not the mechanics.
 
+We need to create an `app` which acts as a top-level collection of functions and other elements
+
+```sh
+fn create app fdkdemo
+```
+
+Deploy your function:
+
+```sh
+fn deploy --local --app fdkdemo
+```
+
 Now run it!
 
 ```sh
-fn deploy --local --app fdkdemo 
 fn invoke fdkdemo nodefunc 
 ```
 
 Now you have a basic running Node function that you can modify and add what you want.
 
-
 ```sh
 echo -n '{"name": "Tom"}' | fn invoke fdkdemo nodefunc
 ```
-
 
 You should see the result
 
@@ -74,7 +89,6 @@ fdk.handle(function(input, ctx){
 })
 ```
 
-
 The context contains other context information about the request such as: 
 
 * `ctx.config` : An Object containing function config variables (from the environment ) (read only)
@@ -88,7 +102,6 @@ The context contains other context information about the request such as:
 * `ctx.addResponseHeader(key,values...)` : Appends values to an existing response header
 * `ctx.responseContentType` set/read the response content type of the function (read/write)
 * `ctx.httpGateway`  The HTTP Gateway context for this function (if set) see `HTTPGatewayContext` below  
-
  
 
 ## Asynchronous function responses
