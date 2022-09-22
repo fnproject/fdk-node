@@ -27,6 +27,7 @@ const fdkVersion = 'fdk-node/' + version.version + ' (njsv=' + runtimeVersion + 
 const runtimeTag = 'node/' + runtimeVersion.substr(1, runtimeVersion.length - 1)
 
 const fnFunctionExceptionMessage = 'Exception in function, consult logs for details'
+const fnFunctionBadRequestErrorMessage = 'Bad request'
 
 /**
  * The function handler  - This is a user-supplied node function that implements the behaviour of the current fn function
@@ -277,7 +278,7 @@ function handleHTTPStream (fnfunction, options) {
     const inputHandler = getInputHandler(inputMode)
 
     if (req.method !== 'POST' || req.url !== '/call') {
-      sendJSONError(resp, 400, { message: 'Invalid method', detail: `${req.method} ${req.url}` })
+      sendJSONError(resp, 400, { message: 'Invalid method', detail: fnFunctionBadRequestErrorMessage })
       return
     }
 
@@ -326,7 +327,7 @@ function handleHTTPStream (fnfunction, options) {
         sendJSONError(resp, 502, { message: fnFunctionExceptionMessage, detail: error.toString() })
       })
     }).on('error', (e) => {
-      sendJSONError(resp, 500, { message: 'Error sending response', detail: `${req.method} ${req.url} ${e.toString()}` })
+      sendJSONError(resp, 500, { message: 'Error sending response', detail: `${e.toString()}` })
     })
   }
 
