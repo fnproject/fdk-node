@@ -28,5 +28,5 @@ image="node"
 
 echo "Pushing release images for Node Runtime Version ${node_version}"
 
-docker push ${user}/${image}:${node_version}
-docker push ${user}/${image}:${node_version}-dev
+./regctl image copy ${OCIR_REGION}/${OCIR_LOC}/nodefdk:${node_version}-${BUILD_VERSION}-dev ${user}/${image}:${node_version}-dev
+./regctl image copy ${OCIR_REGION}/${OCIR_LOC}/nodefdk:${node_version}-${BUILD_VERSION} ${user}/${image}:${node_version}

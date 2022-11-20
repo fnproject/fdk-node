@@ -14,4 +14,4 @@
 # limitations under the License.
 #
 
-FROM docker-remote.artifactory.oci.oraclecorp.com/node:11.15.0-alpine
+FROM --platform=$TARGETPLATFORM docker-remote.artifactory.oci.oraclecorp.com/node:11.15.0-alpine

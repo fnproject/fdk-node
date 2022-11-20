@@ -27,5 +27,9 @@ user="fnproject"
 image="node"
 node_version=$1
 
-pushd internal/images/build-stage/${node_version} && docker build -t ${user}/${image}:${node_version}-dev . && popd
-pushd internal/images/runtime/${node_version} && docker build -t ${user}/${image}:${node_version} . && popd
+#Login to OCIR
+echo ${OCIR_PASSWORD} | docker login --username "${OCIR_USERNAME}" --password-stdin ${OCIR_REGION}
+
+
+pushd internal/images/build-stage/${node_version} && docker buildx build --push --platform linux/amd64,linux/arm64 -t "${OCIR_REGION}/${OCIR_LOC}/nodefdk:${node_version}-${BUILD_VERSION}-dev" .  && popd
+pushd internal/images/runtime/${node_version} && docker buildx build --push --platform linux/amd64,linux/arm64 -t "${OCIR_REGION}/${OCIR_LOC}/nodefdk:${node_version}-${BUILD_VERSION}" . && popd
