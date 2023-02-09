@@ -26,7 +26,13 @@ node_version=$1
 user="fnproject"
 image="node"
 
+OCIR_REPO=iad.ocir.io/oraclefunctionsdevelopm
+ARTIFACTORY_REPO=odo-docker-signed-local.artifactory.oci.oraclecorp.com:443
+
 echo "Pushing release images for Node Runtime Version ${node_version}"
 
-./regctl image copy ${OCIR_REGION}/${OCIR_LOC}/nodefdk:${node_version}-${BUILD_VERSION}-dev ${user}/${image}:${node_version}-dev
-./regctl image copy ${OCIR_REGION}/${OCIR_LOC}/nodefdk:${node_version}-${BUILD_VERSION} ${user}/${image}:${node_version}
+./regctl image copy ${OCIR_REGION}/${OCIR_LOC}/nodefdk:${node_version}-${BUILD_VERSION}-dev $(OCIR_REPO)/${user}/${image}:${node_version}-dev
+./regctl image copy ${OCIR_REGION}/${OCIR_LOC}/nodefdk:${node_version}-${BUILD_VERSION}-dev $(ARTIFACTORY_REPO)/${user}/${image}:${node_version}-dev
+
+./regctl image copy ${OCIR_REGION}/${OCIR_LOC}/nodefdk:${node_version}-${BUILD_VERSION} ${OCIR_REPO}/${user}/${image}:${node_version}
+./regctl image copy ${OCIR_REGION}/${OCIR_LOC}/nodefdk:${node_version}-${BUILD_VERSION} ${ARTIFACTORY_REPO}/${user}/${image}:${node_version}
