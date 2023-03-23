@@ -1,7 +1,7 @@
 schema_version: 20180708
 name: hello-world-fn
 version: 0.0.1
-runtime: node14
-build_image: fnproject/node:14-dev
-run_image: fnproject/node:14
+runtime: node18
+build_image: fnproject/node:18-dev
+run_image: fnproject/node:18
 entrypoint: node func.js

@@ -40,6 +40,7 @@ if [ "${RUN_TYPE}" = "release" ]; then
   chmod 755 regctl
   
   set -x
-  ./internal/release/release_image.sh 11
   ./internal/release/release_image.sh 14
+  ./internal/release/release_image.sh 16
+  ./internal/release/release_image.sh 18
 fi

@@ -16,11 +16,11 @@
 
 # Docker for creating container to build fdk npm package
 
-FROM container-registry.oracle.com/os/oraclelinux:8-slim
+FROM ocr-docker-remote.artifactory.oci.oraclecorp.com/os/oraclelinux:8-slim
 
-RUN microdnf module enable nodejs:14 && \
+RUN microdnf module enable nodejs:18 && \
     microdnf install nodejs npm && \
-    microdnf module reset nodejs:14 && \
+    microdnf module reset nodejs:18 && \
     microdnf clean all
 
 RUN echo $'registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm \n@types:registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm \nstrict-ssl=false'> ~/.npmrc
