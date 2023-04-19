@@ -11,7 +11,7 @@ RUN echo $'registry=https://artifactory.oci.oraclecorp.com/api/npm/global-releas
 COPY fnproject-fdk-${PKG_VERSION}.tgz /function/
 ADD package.json /function/
 RUN npm install fnproject-fdk-${PKG_VERSION}.tgz
-RUN npm install
+RUN npm install && chown -R $(id -u):$(id -g) node_modules
 FROM ${OCIR_REGION}/${OCIR_LOC}/nodefdk:${NODE_VERSION}-${BUILD_VERSION}
 ARG PKG_VERSION="1.0.0-SNAPSHOT"
 WORKDIR /function
