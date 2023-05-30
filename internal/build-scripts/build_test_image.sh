@@ -25,16 +25,12 @@ node_version=$2
   version="$(awk '/^runtime:/ { print $2 }' func.yaml)"
   image_identifier="${version}-${BUILD_VERSION}"
 
-  docker build -t fnproject/${name}:${image_identifier} -f Build_file --build-arg NODE_VERSION=${node_version} --build-arg PKG_VERSION=${BUILD_VERSION} --build-arg OCIR_REGION=${OCIR_REGION} --build-arg OCIR_LOC=${OCIR_LOC} --build-arg BUILD_VERSION=${BUILD_VERSION} .
+  # Push to OCIR
+  ocir_image="${OCIR_LOC}/${name}:${image_identifier}"
+
+  docker buildx build --push --platform linux/amd64,linux/arm64 -t "${OCIR_REGION}/${ocir_image}" -f Build_file --build-arg NODE_VERSION=${node_version} --build-arg PKG_VERSION=${BUILD_VERSION} --build-arg OCIR_REGION=${OCIR_REGION} --build-arg OCIR_LOC=${OCIR_LOC} --build-arg BUILD_VERSION=${BUILD_VERSION} .
 
   # Remove the locally built npm package from the function directory.
   rm -rf fnproject-fdk-${BUILD_VERSION}.tgz
   popd
-
-  # Push to OCIR
-  ocir_image="${OCIR_LOC}/${name}:${image_identifier}"
-
-  docker image tag "fnproject/${name}:${image_identifier}" "${OCIR_REGION}/${ocir_image}"
-  docker image push "${OCIR_REGION}/${ocir_image}"
-
 )

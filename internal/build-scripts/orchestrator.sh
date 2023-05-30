@@ -8,6 +8,10 @@ LOCAL=${LOCAL:-true}
 export BUILD_VERSION
 export LOCAL
 
+# Update buildx and prepare builderInstance
+./internal/build-scripts/init-buildx.sh
+
+
 (
   # Unit test run section
   docker build -t fdk_node_env_image -f ./internal/docker-files/Dockerfile_unit_test_run .
