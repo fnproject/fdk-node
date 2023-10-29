@@ -15,9 +15,17 @@
 #
 
 # Docker for creating container to run unit tests
+FROM  ocr-docker-remote.artifactory.oci.oraclecorp.com/os/oraclelinux:8-slim
+RUN microdnf install yum && \
+    yum install -y git && \
+    yum install -y make && \
+    curl -L https://git.io/n-install --output n-install && \
+    chmod +x n-install && \
+    yes y | ./n-install && \
+    $HOME/n/bin/n 9 && \
+    yum clean all && \
+    microdnf clean all
 
-FROM docker-remote.artifactory.oci.oraclecorp.com/node:9-alpine
-RUN apk add --no-cache wget curl alpine-sdk bash
 RUN mkdir  /build
 COPY . /build
 WORKDIR /build

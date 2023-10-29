@@ -18,11 +18,9 @@
 set -ex
 
 (
+
   echo "node Version"
   node --version
-  echo "npm Version"
-  npm -v
-
   npm install
   npm run test
 )
