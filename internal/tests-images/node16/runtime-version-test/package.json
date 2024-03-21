@@ -1,9 +1,0 @@
-{
-  "name": "runtime-version-fn",
-  "version": "1.0.0",
-  "description": "runtime version check function",
-  "main": "func.js",
-  "author": "",
-  "license": "Apache-2.0",
-  "dependencies": {}
-}

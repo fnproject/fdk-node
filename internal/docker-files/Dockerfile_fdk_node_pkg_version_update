@@ -18,9 +18,9 @@
 
 FROM ocr-docker-remote.artifactory.oci.oraclecorp.com/os/oraclelinux:8-slim
 
-RUN microdnf module enable nodejs:18 && \
+RUN microdnf module enable nodejs:20 && \
     microdnf install nodejs npm && \
-    microdnf module reset nodejs:18 && \
+    microdnf module reset nodejs:20 && \
     microdnf clean all
 
 CMD ["node"]

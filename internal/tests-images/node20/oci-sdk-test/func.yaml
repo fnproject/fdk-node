@@ -1,7 +1,7 @@
 schema_version: 20180708
 name: oci-sdk-fn
 version: 0.0.1
-runtime: node18
-build_image: fnproject/node:18-dev
-run_image: fnproject/node:18
+runtime: node20
+build_image: fnproject/node:20-dev
+run_image: fnproject/node:20
 entrypoint: node func.js
