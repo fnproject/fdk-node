@@ -23,5 +23,7 @@ RUN microdnf module enable nodejs:20 && \
     microdnf module reset nodejs:20 && \
     microdnf clean all
 
+RUN npm install -g tar@latest
+
 CMD ["node"]
 

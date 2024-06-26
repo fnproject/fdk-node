@@ -19,7 +19,9 @@ FROM --platform=$TARGETPLATFORM ocr-docker-remote.artifactory.oci.oraclecorp.com
 RUN microdnf module enable nodejs:18 && \
     microdnf install nodejs npm && \
     microdnf module reset nodejs:18 && \
-    microdnf clean all
+    microdnf clean all \
+
+RUN npm install -g tar@latest
 
 CMD ["node"]
 

@@ -23,6 +23,8 @@ RUN microdnf module enable nodejs:20 && \
     microdnf module reset nodejs:20 && \
     microdnf clean all
 
+RUN npm install -g tar@latest
+
 RUN echo $'registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm \n@types:registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm \nstrict-ssl=false'> ~/.npmrc
 # The above line sets the npm registry to point to the oci artifactory repo in the .npmrc file. Since by default it would point to the public npm repo ie https://registry.npmjs.org. Public npm repos are not accessible over oracle network .
 # Hence in order to access any npm package the registry needs to be pointed to repo in oci artifactory. OCI Artifactory/global-release-npm repo acts as a proxy for the public npm repo.
