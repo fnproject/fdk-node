@@ -19,9 +19,14 @@ FROM --platform=$TARGETPLATFORM ocr-docker-remote.artifactory.oci.oraclecorp.com
 RUN microdnf module enable nodejs:20 && \
     microdnf install nodejs npm && \
     microdnf module reset nodejs:20 && \
-    microdnf clean all \
+    microdnf clean all
 
-RUN npm install -g tar@latest
+# The NPM version we get from the OS isn't necessarily up to date & may have insecure dependencies. We can use it to install the latest NPM version though
+RUN npm --registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm install -g npm@latest
+# This goes into /usr/local/lib, the original is in /usr/lib and can now be removed
+RUN rm -r /usr/lib/node_modules
+# Confirm that the new npm install still works in the absense of the old node_modules directory
+RUN npm --version
 
 CMD ["node"]
 
