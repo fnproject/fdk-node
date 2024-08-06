@@ -16,7 +16,7 @@ FROM ${OCIR_REGION}/${OCIR_LOC}/nodefdk:${NODE_VERSION}-${BUILD_VERSION}
 ARG PKG_VERSION="1.0.0-SNAPSHOT"
 WORKDIR /function
 ADD . /function/
-RUN rm -rf fnproject-fdk-${PKG_VERSION}.tgz Build_file
+RUN rm -rf fnproject-fdk-${PKG_VERSION}.tgz Build_file Build_file.bs
 COPY --from=build-stage /function/node_modules/ /function/node_modules/
 RUN chmod -R o+r /function
 ENTRYPOINT ["node", "func.js"]
