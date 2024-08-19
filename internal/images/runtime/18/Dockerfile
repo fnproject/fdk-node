@@ -19,7 +19,9 @@ FROM --platform=$TARGETPLATFORM ocr-docker-remote.artifactory.oci.oraclecorp.com
 RUN microdnf module enable nodejs:18 && \
     microdnf install nodejs && \
     microdnf module reset nodejs:18 && \
-    microdnf clean all
+    microdnf remove nodejs-docs && \
+    microdnf clean all && \
+    rm -r /usr/lib/node_modules
 
 RUN groupadd --gid 1000 fn && adduser --uid 1000 --gid fn fn
 
