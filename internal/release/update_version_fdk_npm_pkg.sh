@@ -10,4 +10,4 @@ echo "npm Version"
 npm -v
 
 # Below npm version stmt updates both package.json and package-lock.json
-npm version "$RELEASE_VERSION"  --no-git-tag-version
+npm version "$1"  --no-git-tag-version

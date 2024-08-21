@@ -45,11 +45,7 @@ else
    exit 1
 fi
 
-(
-  # Update fdk node package.json and package-lock.json with new/release version
-  docker build -t fdk_pkg_version_update_image -f ./internal/docker-files/Dockerfile_fdk_node_pkg_version_update .
-  docker run --rm -v $PWD:/build -w /build --env RELEASE_VERSION=${new_version} fdk_pkg_version_update_image ./internal/release/update_version_fdk_npm_pkg.sh
-)
+./internal/release/update_version_fdk_npm_pkg.sh $new_version || true
 
 tag="$new_version"
 git add -u
