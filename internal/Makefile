@@ -13,7 +13,7 @@ set_fdk_version:
 	echo "fdk_version=$(FDK_VERSION)" >> $(BLD_INPUT_DIR)/exportVariables.env
 
 fix_fdk_filename:
-	[[ $(RAW_VERSION) != $(FDK_VERSION) ]] && mv fnproject-fdk-*.tgz fnproject-fdk-$(FDK_VERSION).tgz
+	mv fnproject-fdk-*.tgz fnproject-fdk-$(FDK_VERSION).tgz || true
 
 set_image_version:
 	echo "version: \"$(NODE_VERSION)-$(FDK_VERSION)$(if $(VERSION_SUFFIX),-$(VERSION_SUFFIX),)\"" > $(BLD_INPUT_DIR)/buildOverrideVariables.conf
