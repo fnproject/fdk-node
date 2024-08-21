@@ -1,5 +1,10 @@
 RAW_VERSION=$(shell cat package.json | grep version | head -1 | cut -d : -f 2 | sed 's/[\",]//g' | tr -d '[[:space:]]')
+
+ifeq ($(RELEASE), true)
+FDK_VERSION=$(RAW_VERSION)
+else
 FDK_VERSION=$(RAW_VERSION).$(BLD_NUMBER)$(BLD_BRANCH_SUFFIX)
+endif
 
 .PHONY: set_fdk_version fix_fdk_filename set_image_version setup_test_image_build
 
@@ -8,7 +13,7 @@ set_fdk_version:
 	echo "fdk_version=$(FDK_VERSION)" >> $(BLD_INPUT_DIR)/exportVariables.env
 
 fix_fdk_filename:
-	mv fnproject-fdk-*.tgz fnproject-fdk-$(FDK_VERSION).tgz
+	[[ $(RAW_VERSION) != $(FDK_VERSION) ]] && mv fnproject-fdk-*.tgz fnproject-fdk-$(FDK_VERSION).tgz
 
 set_image_version:
 	echo "version: \"$(NODE_VERSION)-$(FDK_VERSION)$(if $(VERSION_SUFFIX),-$(VERSION_SUFFIX),)\"" > $(BLD_INPUT_DIR)/buildOverrideVariables.conf
