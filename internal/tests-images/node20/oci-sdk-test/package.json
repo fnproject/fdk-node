@@ -6,7 +6,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "oci-identity" : "2.1.0",
-    "oci-common" : "2.1.0"
+    "oci-identity" : "2.98.0",
+    "oci-common" : "2.98.0"
   }
 }
