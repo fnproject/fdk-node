@@ -46,7 +46,7 @@ steps:
     name: Copy base images to OCIR
     command: |
       set -ex
-      declare -a node_versions=('18' '20')
+      declare -a node_versions=('20' '22')
       declare -a suffixes=('' '-dev')
       for node in "${node_versions[@]}"; do
           for suffix in "${suffixes[@]}"; do
@@ -68,11 +68,14 @@ steps:
           ${OCI_WORKSPACE_DIR}/regctl image copy -v=DEBUG "$src" "$dst"
       }
       
-      copy_image runtime-version-fn 18
       copy_image hello-world-fn 20
       copy_image oci-sdk-fn 20
       copy_image runtime-version-fn 20
       copy_image timeout-fn 20
+      copy_image hello-world-fn 22
+      copy_image oci-sdk-fn 22
+      copy_image runtime-version-fn 22
+      copy_image timeout-fn 22
 
   - type: shell
     name: Run Integration Test Node 20
@@ -87,14 +90,14 @@ steps:
       java -jar junit-platform-console-standalone.jar -cp "$CLASSPATH" --scan-class-path
 
   - type: shell
-    name: Run Integration Test Node 18
+    name: Run Integration Test Node 22
     command: |
-      mkdir -p integration_test_node18
-      cd integration_test_node18
+      mkdir -p integration_test_node22
+      cd integration_test_node22
       tar zxvf ${OCI_WORKSPACE_DIR}/input/fdk-integration-test-${FDK_INTEGRATION_TEST_VERSION}.tar.gz .
 
       CLASSPATH=$(echo *.jar | tr ' ' ':')
-      export FDK_RUNTIME=node18
+      export FDK_RUNTIME=node22
       export test=RuntimeVersionIntegrationTest
       java -jar junit-platform-console-standalone.jar -cp "$CLASSPATH" --scan-class-path
 
@@ -103,7 +106,7 @@ steps:
     command: |
       set -ex
       if [[ "${RELEASE:-false}" == true ]]; then
-        declare -a node_versions=('18' '20')
+        declare -a node_versions=('20' '22')
         declare -a suffixes=('' '-dev')
         for node in "${node_versions[@]}"; do
             for suffix in "${suffixes[@]}"; do

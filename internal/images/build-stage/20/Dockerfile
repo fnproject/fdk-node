@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FROM --platform=$TARGETPLATFORM ocr-docker-remote.artifactory.oci.oraclecorp.com/os/oraclelinux:8-slim
+FROM --platform=$TARGETPLATFORM ocr-docker-remote.artifactory.oci.oraclecorp.com/os/oraclelinux:9-slim
 
 RUN microdnf module enable nodejs:20 && \
     microdnf install nodejs npm && \

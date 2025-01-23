@@ -1,0 +1,12 @@
+{
+  "name": "timeout-fn",
+  "version": "1.0.0",
+  "description": "set timeout function",
+  "main": "func.js",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "oci-identity" : "2.98.0",
+    "oci-common" : "2.98.0"
+  }
+}

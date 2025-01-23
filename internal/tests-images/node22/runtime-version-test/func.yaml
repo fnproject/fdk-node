@@ -1,7 +1,7 @@
 schema_version: 20180708
 name: runtime-version-fn
 version: 0.0.1
-runtime: node18
-build_image: fnproject/node:18-dev
-run_image: fnproject/node:18
+runtime: node22
+build_image: fnproject/node:22-dev
+run_image: fnproject/node:22
 entrypoint: node func.js
