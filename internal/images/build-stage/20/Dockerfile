@@ -25,7 +25,7 @@ RUN microdnf module enable nodejs:20 && \
 # The new npm will be installed in /usr/local/lib and the the original is in /usr/lib and can now be removed
 # Finally, we verify the new npm installation
 
-RUN npm --registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm install -g npm@latest && \
+RUN npm --registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm install -g npm@10.8.1 && \
     rm -r /usr/lib/node_modules && \
     npm --version
 
