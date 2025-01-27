@@ -17,6 +17,6 @@ trap cleanup EXIT
 {
 $REGCTL_BIN image copy iad.ocir.io/oraclefunctionsdevelopm/fnproject/node:20 docker.io/fnproject/node:20;
 $REGCTL_BIN image copy iad.ocir.io/oraclefunctionsdevelopm/fnproject/node:20-dev docker.io/fnproject/node:20-dev;
-$REGCTL_BIN image copy iad.ocir.io/oraclefunctionsdevelopm/fnproject/node:22 docker.io/fnproject/node:18;
-$REGCTL_BIN image copy iad.ocir.io/oraclefunctionsdevelopm/fnproject/node:22-dev docker.io/fnproject/node:18-dev;
+$REGCTL_BIN image copy iad.ocir.io/oraclefunctionsdevelopm/fnproject/node:22 docker.io/fnproject/node:22;
+$REGCTL_BIN image copy iad.ocir.io/oraclefunctionsdevelopm/fnproject/node:22-dev docker.io/fnproject/node:22-dev;
 }
