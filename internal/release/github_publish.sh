@@ -41,4 +41,9 @@ git config user.email ${GIT_USER_EMAIL}
 git config user.name ${GIT_USER_NAME}
 git merge --ff bitbucket/${PUBLISH_BRANCH}
 git push
-git push origin --tags
+
+VERSION_FILE=package.json
+RELEASE_VERSION=$(grep -m1 -Eo "[0-9]+\.[0-9]+\.[0-9]+" ${VERSION_FILE})
+echo "Release version: ${RELEASE_VERSION}"
+git tag -f -a ${RELEASE_VERSION} -m "version: ${RELEASE_VERSION}"
+git push origin ${RELEASE_VERSION}
