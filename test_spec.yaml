@@ -14,12 +14,12 @@ env:
       OCIR_REGION: "iad.ocir.io"
 
 inputArtifacts:
-  - name: downloadDockerCredentialHelper
-    location: ${OCI_WORKSPACE_DIR}/input
-    url: https://pipelines.artifactory.us-phoenix-1.oci.oracleiaas.com/ocir-overlay-global-yum-local/docker-credential-ocir-996.1f4a1425ed3-1.noarch.rpm
   - name: downloadRegctl
     location: ${OCI_WORKSPACE_DIR}/input
     url: https://pipelines.artifactory.us-phoenix-1.oci.oracleiaas.com/faas-release-generic-local/regctl/regctl-linux-arm64
+  - name: downloadDockerCredentialOcir
+    location: ${OCI_WORKSPACE_DIR}/input
+    url: https://pipelines.artifactory.us-phoenix-1.oci.oracleiaas.com/faas-release-generic-local/scripts/docker-credential-ocir
   - name: downloadTestHarness
     location: ${OCI_WORKSPACE_DIR}/input
     url: https://pipelines.artifactory.us-phoenix-1.oci.oracleiaas.com/faas-release-generic-local/fdk-integration-test/fdk-integration-test-${FDK_INTEGRATION_TEST_VERSION}.tar.gz
@@ -29,18 +29,17 @@ steps:
     name: Setup Environment
     command: |
       set -ex
-      pushd ${OCI_WORKSPACE_DIR}/input
-      sudo rpm-ostree cleanup --pending
-      sudo rpm-ostree install -y docker-credential-ocir-996.1f4a1425ed3-1.noarch.rpm
-      sudo rpm-ostree apply-live --allow-replacement
-      popd
 
-      sudo docker login -u BEARER_TOKEN -p $(echo "${FAAS_OCIR_REGION}" | docker-credential-ocir get | jq -r .Secret) "${FAAS_OCIR_REGION}"
+      # docker-credential-ocir is no longer installed from an rpm - we use a script replacement as recommended by OCIR
+      cp ${OCI_WORKSPACE_DIR}/input/docker-credential-ocir ${OCI_WORKSPACE_DIR}/docker-credential-ocir
+      chmod 755 ${OCI_WORKSPACE_DIR}/docker-credential-ocir
+
+      sudo docker login -u BEARER_TOKEN -p $(echo "${FAAS_OCIR_REGION}" | ${OCI_WORKSPACE_DIR}/docker-credential-ocir get | jq -r .Secret) "${FAAS_OCIR_REGION}"
 
       cp ${OCI_WORKSPACE_DIR}/input/regctl-linux-arm64 ${OCI_WORKSPACE_DIR}/regctl
       chmod 755 ${OCI_WORKSPACE_DIR}/regctl
 
-      ${OCI_WORKSPACE_DIR}/regctl registry login -u BEARER_TOKEN -p $(echo "${FAAS_OCIR_REGION}" | docker-credential-ocir get | jq -r .Secret) "${FAAS_OCIR_REGION}"
+      ${OCI_WORKSPACE_DIR}/regctl registry login -u BEARER_TOKEN -p $(echo "${FAAS_OCIR_REGION}" | ${OCI_WORKSPACE_DIR}/docker-credential-ocir get | jq -r .Secret) "${FAAS_OCIR_REGION}"
 
   - type: shell
     name: Copy base images to OCIR
