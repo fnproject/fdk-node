@@ -1,6 +1,6 @@
 {
   "name": "@fnproject/fdk",
-  "version": "0.0.78",
+  "version": "0.0.79",
   "description": "Function Developer Kit for Fn",
   "main": "fn-fdk.js",
   "scripts": {
@@ -22,7 +22,7 @@
   ],
   "license": "Apache-2.0",
   "dependencies": {
-    "cross-spawn": "^7.0.5"
+    "cross-spawn": "7.0.6"
   },
   "devDependencies": {
     "rewire": "5.0.0",
