@@ -27,7 +27,7 @@ RUN groupadd --gid 1000 fn && adduser --uid 1000 --gid fn fn
 # The new npm will be installed in /usr/local/lib and the the original is in /usr/lib and can now be removed
 # Finally, we verify the new npm installation
 
-RUN npm --registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm install -g npm@10.9.2 && \
+RUN npm --registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm install -g npm@10.9.3 && \
     rm -r /usr/lib/node_modules && \
     npm --version
 
