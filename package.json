@@ -1,6 +1,6 @@
 {
   "name": "@fnproject/fdk",
-  "version": "0.0.81",
+  "version": "0.0.82",
   "description": "Function Developer Kit for Fn",
   "main": "fn-fdk.js",
   "scripts": {
@@ -27,7 +27,7 @@
   "devDependencies": {
     "rewire": "5.0.0",
     "sinon": "^9.0.1",
-    "standard": "14.3.1",
+    "standard": "17.1.2",
     "tape": "^4.13.2",
     "tmp": "0.1.0"
   }
