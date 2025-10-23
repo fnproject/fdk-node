@@ -1,7 +1,0 @@
-schema_version: 20180708
-name: timeout-fn
-version: 0.0.1
-runtime: node20
-build_image: fnproject/node:20-dev
-run_image: fnproject/node:20
-entrypoint: node func.js
