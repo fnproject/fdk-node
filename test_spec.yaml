@@ -94,8 +94,8 @@ steps:
         for node in "${node_versions[@]}"; do
             for suffix in "${suffixes[@]}"; do
                 src="${FAAS_OCIR_REGION}/oraclefunctionsdevelopm/test-functions/nodefdk:${node}-${FDK_VERSION}${suffix}"
-                dst="${FAAS_OCIR_REGION}/oraclefunctionsdevelopm/fnproject/node:${node}${suffix}"
-                ${OCI_WORKSPACE_DIR}/regctl image copy -v=DEBUG "$src" "$dst"
+                ${OCI_WORKSPACE_DIR}/regctl image copy -v=DEBUG "$src" "${FAAS_OCIR_REGION}/oraclefunctionsdevelopm/fnproject/node:${node}-${FDK_VERSION}${suffix}"
+                ${OCI_WORKSPACE_DIR}/regctl image copy -v=DEBUG "$src" "${FAAS_OCIR_REGION}/oraclefunctionsdevelopm/fnproject/node:${node}${suffix}"
             done
         done
       fi

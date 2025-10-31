@@ -17,7 +17,7 @@ function cleanup {
 }
 trap cleanup EXIT
 
-KEY=$(oci secrets secret-bundle get --auth security_token --region us-phoenix-1 --secret-id ${SSH_KEY_SECRET} --raw-output --query 'data."secret-bundle-content".content' | base64 -D)
+KEY=$(oci secrets secret-bundle get --auth security_token --region us-phoenix-1 --secret-id ${SSH_KEY_SECRET} --raw-output --query 'data."secret-bundle-content".content' | base64 -d)
 echo "$KEY" >key
 chmod 600 key
 
