@@ -21,16 +21,22 @@ const test = require('tape')
 const path = require('path')
 const fs = require('fs')
 const rewire = require('rewire')
-const sinon = require('sinon')
+const originalProcess = process
 
 test('print logFramer', function (t) {
   const fdk = rewire('../fn-fdk.js')
   const tmpDir = tmp.dirSync({})
   const socketFile = path.join(tmpDir.name, 'test.sock')
-  const logFake = sinon.fake()
-  const errorFake = sinon.fake()
+  const originalLog = console.log
+  const originalError = console.error
+  const logged = []
+  const errored = []
+
+  console.log = (...args) => logged.push(args.join(' '))
+  console.error = (...args) => errored.push(args.join(' '))
   fdk.__set__({
     process: {
+      ...process,
       env: {
         FN_FORMAT: 'http-stream',
         FN_LISTENER: 'unix:' + socketFile,
@@ -41,10 +47,6 @@ test('print logFramer', function (t) {
       exit: function () {
         throw new Error('got exit')
       }
-    },
-    console: {
-      log: logFake,
-      error: errorFake
     }
   })
   const cleanup = fdk.handle((input, ctx) => {
@@ -70,21 +72,22 @@ test('print logFramer', function (t) {
       }).then(r => {
         t.equals(r.body, '\nfoo=callId')
         t.equals(r.resp.headers['fn-http-status'], '200')
-        t.ok(logFake.calledWith('\nfoo=callId'))
-        t.ok(errorFake.calledWith('\nfoo=callId'))
+        t.ok(logged.some(l => l.includes('\nfoo=callId')))
+        t.ok(errored.some(e => e.includes('\nfoo=callId')))
+        console.log = originalLog
+        console.error = originalError
         t.end()
       })
-    })
-    .then(cleanup)
-    .then(() => socketFile.removeCallback)
+    }).then(cleanup)
     .catch(e => t.fail(e))
+    .finally(() => socketFile.removeCallback)
 })
-
 test('reject missing format env ', function (t) {
   const fdk = rewire('../fn-fdk.js')
   fdk.__set__(
     {
       process: {
+        ...process,
         env: {
           FN_LISTENER: 'unix:/tmp/foo.sock'
         },
@@ -102,11 +105,12 @@ test('reject missing format env ', function (t) {
   }
 })
 
-test('reject missing listener  env ', function (t) {
+test('reject missing listener env ', function (t) {
   const fdk = rewire('../fn-fdk.js')
   fdk.__set__(
     {
       process: {
+        ...process,
         env: {
           FN_FORMAT: 'http-stream'
         },
@@ -129,8 +133,10 @@ test('reject invalid format', function (t) {
   fdk.__set__(
     {
       process: {
+        ...process,
         env: {
-          FN_FORMAT: ''
+          FN_FORMAT: '',
+          FN_LISTENER: 'unix:/tmp/foo.sock'
         },
         exit: function (code) {
           t.equals(code, 2)
@@ -145,7 +151,6 @@ test('reject invalid format', function (t) {
     t.end()
   }
 })
-
 test('Listens and accepts request', function (t) {
   const fdk = rewire('../fn-fdk.js')
   const tmpDir = tmp.dirSync({})
@@ -213,7 +218,7 @@ test('Listens and accepts request', function (t) {
       })
     })
     .then(cleanup)
-    .then(() => socketFile.removeCallback)
+    .finally(() => socketFile.removeCallback)
     .catch(e => t.fail(e))
 })
 
@@ -291,7 +296,7 @@ test('Listens and accepts tracing request', function (t) {
       })
     })
     .then(cleanup)
-    .then(() => socketFile.removeCallback)
+    .finally(() => socketFile.removeCallback)
     .catch(e => t.fail(e))
 })
 
@@ -316,7 +321,7 @@ test('handle exception from function', function (t) {
         })
     }).catch(e => t.fail(e))
     .then(cleanup)
-    .then(() => socketFile.removeCallback)
+    .finally(() => socketFile.removeCallback)
 })
 
 test('Listens and accepts request', function (t) {
@@ -360,7 +365,7 @@ test('Listens and accepts request', function (t) {
       })
     }).catch(e => t.fail(e))
     .then(cleanup)
-    .then(() => socketFile.removeCallback)
+    .finally(() => socketFile.removeCallback)
 })
 
 test('handle multiple requests', function (t) {
@@ -384,7 +389,7 @@ test('handle multiple requests', function (t) {
       t.end()
     }).catch(e => t.fail(e))
     .then(cleanup)
-    .then(() => socketFile.removeCallback)
+    .finally(() => socketFile.removeCallback)
 })
 
 test('handle raw promise from function', function (t) {
@@ -410,7 +415,7 @@ test('handle raw promise from function', function (t) {
         })
     }).catch(e => t.fail(e))
     .then(cleanup)
-    .then(() => socketFile.removeCallback)
+    .finally(() => socketFile.removeCallback)
 })
 
 test('handle rejected promise from function', function (t) {
@@ -437,7 +442,7 @@ test('handle rejected promise from function', function (t) {
         })
     }).catch(e => t.fail(e))
     .then(cleanup)
-    .then(() => socketFile.removeCallback)
+    .finally(() => socketFile.removeCallback)
 })
 
 test('handle async', function (t) {
@@ -469,7 +474,7 @@ test('handle async', function (t) {
         })
     }).catch(e => t.fail(e))
     .then(cleanup)
-    .then(() => socketFile.removeCallback)
+    .finally(() => socketFile.removeCallback)
 })
 
 test('handle streamed file', function (t) {
@@ -495,7 +500,7 @@ test('handle streamed file', function (t) {
         })
     }).catch(e => t.fail(e))
     .then(cleanup)
-    .then(() => socketFile.removeCallback)
+    .finally(() => socketFile.removeCallback)
 })
 
 test('handle binary input', function (t) {
@@ -523,12 +528,14 @@ test('handle binary input', function (t) {
         })
     }).catch(e => t.fail(e))
     .then(cleanup)
-    .then(() => socketFile.removeCallback)
+    .finally(() => socketFile.removeCallback)
 })
 
 function defaultSetup (socketFile) {
   return {
     process: {
+      ...process,
+      removeAllListeners: () => process.removeAllListeners,
       env: {
         FN_FORMAT: 'http-stream',
         FN_LISTENER: 'unix:' + socketFile,
@@ -548,6 +555,7 @@ function defaultSetup (socketFile) {
 function tracingSetup (socketFile) {
   return {
     process: {
+      ...process,
       env: {
         FN_FORMAT: 'http-stream',
         FN_LISTENER: 'unix:' + socketFile,
@@ -696,6 +704,10 @@ test('Handle Http input', function (t) {
       })
     })
     .then(cleanup)
-    .then(() => socketFile.removeCallback)
     .catch(e => t.fail(e))
+    .finally(() => socketFile.removeCallback)
+})
+test.onFinish(() => {
+  const fdk = rewire('../fn-fdk.js')
+  fdk.__set__({ process: originalProcess })
 })

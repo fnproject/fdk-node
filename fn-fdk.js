@@ -362,6 +362,7 @@ function canonHeader (h) {
       const first = h.substr(0, 1)
       return first.toUpperCase() + last.toLowerCase()
     }
+    return ''
   }).join('-')
 }
 
@@ -442,6 +443,14 @@ class HTTPGatewayContext {
    */
   set statusCode (status) {
     this.ctx.setResponseHeader('Fn-Http-Status', status)
+  }
+
+  /**
+   * Returns the HTTP status code of the HTTP response
+   * @returns {string}
+   */
+  get statusCode () {
+    return this.ctx.getResponseHeader('Fn-Http-Status')
   }
 
   /**

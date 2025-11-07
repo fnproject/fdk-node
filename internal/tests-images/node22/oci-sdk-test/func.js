@@ -28,7 +28,7 @@ fdk.handle(async function (input) {
     })
 
     const compartmentRequest = {
-      compartmentId: compartmentId
+      compartmentId
     }
     const response = await identityClient.getCompartment(compartmentRequest)
     res = response.compartment.id

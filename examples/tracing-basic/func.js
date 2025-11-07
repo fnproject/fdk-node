@@ -15,9 +15,9 @@ const {
 const { HttpLogger } = require('zipkin-transport-http')
 
 fdk.handle(async function (input, ctx) {
-  var tracer = createOCITracer(ctx)
+  const tracer = createOCITracer(ctx)
 
-  var result
+  let result
   // Start a new 'scoped' server handling span.
   await tracer.scoped(async function () {
     // Fetch some resource
@@ -58,7 +58,7 @@ function fetchResource () {
  * @returns A Promise with the success or failure of the operation.
  */
 async function someComputation (toReturn) {
-  var i
+  let i
   for (i = 0; i < 5; i++) {
     await simulate(1000)
   }

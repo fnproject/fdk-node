@@ -29,6 +29,7 @@ RUN groupadd --gid 1000 fn && adduser --uid 1000 --gid fn fn
 
 RUN npm --registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm install -g npm@10.9.3 && \
     rm -r /usr/lib/node_modules && \
+    npm cache clean --force && \
     npm --version
 
 CMD ["node"]

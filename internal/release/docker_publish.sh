@@ -18,8 +18,8 @@ function cleanup {
 trap cleanup EXIT
 
 {
-$REGCTL_BIN image copy iad.ocir.io/oraclefunctionsdevelopm/fnproject/node:22 docker.io/fnproject/node:22;
-$REGCTL_BIN image copy iad.ocir.io/oraclefunctionsdevelopm/fnproject/node:22-dev docker.io/fnproject/node:22-dev;
 $REGCTL_BIN image copy iad.ocir.io/oraclefunctionsdevelopm/fnproject/node:22-$BUILD_TAG docker.io/fnproject/node:22-$BUILD_TAG;
 $REGCTL_BIN image copy iad.ocir.io/oraclefunctionsdevelopm/fnproject/node:22-$BUILD_TAG-dev docker.io/fnproject/node:22-$BUILD_TAG-dev;
+$REGCTL_BIN image copy iad.ocir.io/oraclefunctionsdevelopm/fnproject/node:22 docker.io/fnproject/node:22;
+$REGCTL_BIN image copy iad.ocir.io/oraclefunctionsdevelopm/fnproject/node:22-dev docker.io/fnproject/node:22-dev;
 }
