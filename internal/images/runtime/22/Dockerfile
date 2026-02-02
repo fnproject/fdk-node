@@ -19,6 +19,7 @@ FROM --platform=$TARGETPLATFORM ocr-docker-remote.artifactory.oci.oraclecorp.com
 RUN microdnf module enable nodejs:22 && \
     microdnf install nodejs npm && \
     microdnf module reset nodejs:22 && \
+    microdnf update -y && \
     microdnf clean all
 
 RUN groupadd --gid 1000 fn && adduser --uid 1000 --gid fn fn

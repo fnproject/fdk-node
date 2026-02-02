@@ -19,6 +19,7 @@ FROM --platform=$TARGETPLATFORM ocr-docker-remote.artifactory.oci.oraclecorp.com
 RUN microdnf module enable nodejs:22 && \
     microdnf install nodejs npm && \
     microdnf module reset nodejs:22 && \
+    microdnf update -y && \
     microdnf clean all
 
 # The NPM version we get from the OS isn't necessarily up to date & may have insecure dependencies. We can use it to install the latest NPM version though. \
