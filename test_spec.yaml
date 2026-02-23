@@ -81,7 +81,7 @@ steps:
 
       CLASSPATH=$(echo *.jar | tr ' ' ':')
       export FDK_RUNTIME=node22
-      export test=RuntimeVersionIntegrationTest
+      export test=FunctionsIntegrationTest,RuntimeVersionIntegrationTest,OciSdkUsageIntegrationTest
       java -jar junit-platform-console-standalone.jar -cp "$CLASSPATH" --scan-class-path
 
   - type: shell
