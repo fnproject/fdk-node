@@ -26,7 +26,7 @@ RUN microdnf module enable nodejs:22 && \
 # The new npm will be installed in /usr/local/lib and the the original is in /usr/lib and can now be removed
 # Finally, we verify the new npm installation
 
-RUN npm --registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm install -g npm@11.7.0 && \
+RUN npm --registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm install -g npm@11.9.0 && \
     rm -r /usr/lib/node_modules && \
     npm --version
 
