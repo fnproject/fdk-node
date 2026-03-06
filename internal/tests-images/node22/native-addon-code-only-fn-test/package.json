@@ -1,0 +1,9 @@
+{
+  "name": "native-addon-code-only-fn",
+  "version": "1.0.0",
+  "private": true,
+  "main": "func.js",
+  "dependencies": {
+    "customer-native-addon": "file:./customer-native-addon"
+  }
+}

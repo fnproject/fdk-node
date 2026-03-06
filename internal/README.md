@@ -1,50 +1,63 @@
-# Integration test package for Node FDK
-The internal integration test package for Node FDK helps to build
-test images of functions and pushes them to OCIR.
+# Internal folder in Node FDK
+The internal folder for Node FDK contains scripts for building base build, runtime and code only fn runtime images, and the FDK npm package.
+It also contains scripts to release artifacts as part of the FDK release pipeline and includes test function image folders used by the
+[FDK integration tests suite](https://bitbucket.oci.oraclecorp.com/projects/FAAS/repos/fdk-integration-tests/browse).
 
-## Overview of the integration test package folders
+## Overview of the directory structure of the internal folder
 
--   internal/build-scripts - Contains build scripts to build the following:
-    -   fdk node npm package. It is a tarball file in the format of fnproject-fdk-*.tar.gz
-    -   Base images for fdk build and runtime
-    -   Build and push test function images to OCIR.
--   internal/docker_files - Contains dockerfiles to support the building of node runtime images for following
-    -   Execution of unit tests
-    -   Building fdk node npm package
-    -   Update npm version of fdk node package for release
--   internal/images - Contains dockerfiles to support the building of base fdk build and runtime images.    
--   internal/tests-images - Contains source code of test functions for different node runtime versions.
--   internal/cache_node_images - This script pulls node images from docker hub and caches them in artifactory.
--   internal/release - Contains scripts to support version update of fdk node package and release docker artifacts to remote repository.
+### images
+- Contains Dockerfiles to build the following: 
+  - `build-stage/` - Builds base build image(s) for different Node runtimes.
+  - `runtime/` - Builds base runtime image(s) for different Node runtimes.
+  - `code-only-fn-runtime/` - Builds base code-only function runtime image(s) (FDK baked in).
+- The folder structure is runtime-version specific (e.g. `22/`, `24/`).
 
+### release
+- Contains release scripts, including:
+  - `docker_publish.sh` - Publishes the build and runtime images.
+  - `github_publish.sh` - Publishes the FDK code to public GitHub repo https://github.com/fnproject/fdk-node
+  - `setup_release_version.sh` - Updates version(s) and creates git tag(s) as part of release.
+  - `update_version_fdk_npm_pkg.sh` - Updates the FDK npm package version metadata.
 
-## Steps to generate the test function images and push them to OCIR
+### Makefile
+- Contains important steps invoked from ocibuild.conf build and publish steps -
+  - build the FDK npm package
+  - set versions and docker build args required to build/publish build, runtime and code-only runtime images
+  - build/publish test function images used by the integration test suite
 
--   Setup below environment variables
-    ```sh
-    export BUILD_VERSION=1.0.0-SNAPSHOT
-    export OCIR_PASSWORD=''
-    export OCIR_USERNAME=bmc_operator_access/<guid>
-    export OCIR_REGION=<airport_code>.ocir.io
-    export OCIR_LOC=<tenancy_name>/<repo>
-    
-    Example -
-    export BUILD_VERSION=1.0.0-SNAPSHOT
-    export OCIR_PASSWORD=''
-    export OCIR_USERNAME=bmc_operator_access/<guid>
-    export OCIR_REGION="iad.ocir.io"
-    export OCIR_LOC="oraclefunctionsdevelopm/fdk-test-functions"
-    ```
--   Run the script to build all the artifacts and test images.
-    ```sh
-    ./internal/build-scripts/orchestrator.sh
-    ```
+### tests-images
+- Contains source code for test functions across different Node runtime versions.
+- The folder structure is organized by runtime version, for example:
+  - `node22/`
+  - `node24/`
+- Each test function folder typically contains:
+  - `Build_file.bs` (Docker build spec)
+  - function source code (e.g. `func.js`)
+  - optional `package.json` for dependency-based tests
 
-## Cache node docker images in artifactory
--   Since artifactory functions as a caching proxy for DockerHub, any image pulled from dockerhub will be cached in artifactory.
-    The cached images will be removed as part of cleanup if not downloaded again within a particular time frame. 
-    Hence, one may encounter rate limiting issue while accessing the node docker images. 
-    -   To resolve the rate limiting issue, execute below script locally
-        ```sh
-        ./internal/cache_node_images.sh
-        ```
+#### How these tests work (end-to-end)
+
+1. **Function image build**
+   - Each test folder contains a `Build_file.bs` and function source code.
+   - The test function image is built either on top of the base build/runtime images (to simulate container-image based functions)
+     or on top of the code-only runtime image (to simulate code-only function images).
+
+2. **Image publication**
+   - As part of the `ocibuild.conf` build and publish steps:
+     - test function images are built
+     - images are published to Artifactory
+
+3. **Image copy to OCIR**
+   - The published test images are copied to OCIR as part of `test_spec.yaml` pipeline steps.
+
+4. **FDK integration testing**
+   - The **FDK integration test suite**
+     https://bitbucket.oci.oraclecorp.com/projects/FAAS/repos/fdk-integration-tests/browse
+   - Uses the test function image paths from OCIR to:
+     - create OCI Functions
+     - invoke the functions
+     - validate:
+       - function creation status
+       - invoke HTTP status codes
+       - response body
+       - headers

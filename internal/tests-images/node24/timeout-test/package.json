@@ -1,0 +1,9 @@
+{
+  "name": "timeout-fn",
+  "version": "1.0.0",
+  "description": "set timeout function",
+  "main": "func.js",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {}
+}

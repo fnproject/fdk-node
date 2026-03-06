@@ -1,0 +1,74 @@
+ARG BUILD_IMAGE_VERSION
+ARG CODE_ONLY_FN_RUNTIME_IMAGE_VERSION
+
+# ---------------------------
+# Build stage: install native deps (compile if needed) + build customer addon for this TARGETPLATFORM
+# ---------------------------
+FROM --platform=$TARGETPLATFORM odo-docker-signed-local.artifactory-builds.oci.oraclecorp.com/fdk-node:${BUILD_IMAGE_VERSION} as build-stage
+
+WORKDIR /work
+
+# NPM registry config
+RUN echo $'registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm\n@types:registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm\nstrict-ssl=false' > ~/.npmrc
+
+# Build toolchain for node-gyp
+RUN microdnf install -y --setopt=tsflags=nodocs --setopt=install_weak_deps=0 \
+      python3 \
+      make \
+      gcc \
+      gcc-c++ \
+    && microdnf clean all \
+    && rm -rf /var/cache/dnf
+
+COPY customer-native-addon/ /work/customer-native-addon/
+
+RUN set -eux; \
+    cd /work/customer-native-addon; \
+    npm install --no-fund; \
+    npm exec -- node-gyp rebuild; \
+    archDir="fn-arch-x86"; \
+    pre="linux-x64"; \
+    if [ "$(uname -m)" = "aarch64" ]; then \
+      archDir="fn-arch-arm"; \
+      pre="linux-arm64"; \
+    fi; \
+    out="/native/${archDir}/customer-native-addon"; \
+    mkdir -p "${out}/build/Release" "${out}/prebuilds/${pre}"; \
+    cp -v package.json index.js binding.gyp "${out}/"; \
+    \
+    # Include runtime JS deps like node-gyp-build
+    if [ -d node_modules ]; then \
+      mkdir -p "${out}/node_modules"; \
+      cp -a node_modules/. "${out}/node_modules/"; \
+    fi; \
+    \
+    cp -v build/Release/*.node "${out}/build/Release/"; \
+    cp -v build/Release/*.node "${out}/prebuilds/${pre}/" || true
+# ---------------------------
+# Runtime stage: copy prebuilt node_modules + addon prebuilds
+# ---------------------------
+FROM --platform=$TARGETPLATFORM odo-docker-signed-local.artifactory-builds.oci.oraclecorp.com/fdk-node:${CODE_ONLY_FN_RUNTIME_IMAGE_VERSION}
+
+WORKDIR /function
+RUN echo $'registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm\n@types:registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm\nstrict-ssl=false' > ~/.npmrc
+
+COPY func.js /function/func.js
+
+COPY --from=build-stage /native /native
+
+ARG TARGETPLATFORM
+RUN set -eux; \
+    : "${TARGETPLATFORM:?TARGETPLATFORM must be set}"; \
+    mkdir -p /function/node_modules/native; \
+    if [ "${TARGETPLATFORM}" = "linux/amd64" ]; then \
+      cp -a /native/fn-arch-x86/. /function/node_modules/native/; \
+    elif [ "${TARGETPLATFORM}" = "linux/arm64" ]; then \
+      cp -a /native/fn-arch-arm/. /function/node_modules/native/; \
+    else \
+      echo "Unsupported TARGETPLATFORM=${TARGETPLATFORM}"; exit 1; \
+    fi; \
+    rm -rf /native; \
+    chmod -R o+r /function
+
+ENV NODE_PATH=/function/node_modules:/function/node_modules/native:/opt/function/node_modules
+ENTRYPOINT ["node", "func.js"]

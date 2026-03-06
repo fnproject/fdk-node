@@ -1,0 +1,16 @@
+{
+  "name": "node-pure-deps-test",
+  "private": true,
+  "dependencies": {
+    "@fnproject/fdk": "0.0.87",
+    "lodash": "4.17.21",
+    "express": "^4.19.0",
+    "axios": "^1.6.0",
+    "uuid": "^9.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "mongodb": "^6.0.0",
+    "pg": "^8.0.0",
+    "redis": "^4.0.0",
+    "@grpc/grpc-js": "^1.10.0"
+  }
+}

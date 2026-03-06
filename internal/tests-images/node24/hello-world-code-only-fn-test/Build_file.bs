@@ -1,0 +1,9 @@
+ARG CODE_ONLY_FN_RUNTIME_IMAGE_VERSION
+
+FROM odo-docker-signed-local.artifactory-builds.oci.oraclecorp.com/fdk-node:${CODE_ONLY_FN_RUNTIME_IMAGE_VERSION}
+
+WORKDIR /function
+COPY func.js /function/func.js
+
+RUN chmod -R o+r /function
+ENTRYPOINT ["node", "func.js"]

@@ -1,0 +1,19 @@
+ARG BUILD_IMAGE_VERSION
+ARG RUNTIME_IMAGE_VERSION
+
+FROM odo-docker-signed-local.artifactory-builds.oci.oraclecorp.com/fdk-node:${BUILD_IMAGE_VERSION} as build-stage
+ARG FDK_VERSION
+WORKDIR /function
+RUN echo $'registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm \n@types:registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm \nstrict-ssl=false'> ~/.npmrc
+COPY fnproject-fdk-${FDK_VERSION}.tgz /function/
+ADD package.json /function/
+RUN npm install fnproject-fdk-${FDK_VERSION}.tgz
+
+FROM odo-docker-signed-local.artifactory.oci.oraclecorp.com/fdk-node:${RUNTIME_IMAGE_VERSION}
+ARG FDK_VERSION
+WORKDIR /function
+ADD . /function/
+RUN rm -rf fnproject-fdk-${FDK_VERSION}.tgz Build_file Build_file.bs
+COPY --from=build-stage /function/node_modules/ /function/node_modules/
+RUN chmod -R o+r /function
+ENTRYPOINT ["node", "func.js"]

@@ -1,0 +1,12 @@
+{
+  "name": "backward-compatibility-code-only-fn",
+  "version": "1.0.0",
+  "description": "Test backward compatibility and response and protocol compatibility",
+  "main": "func.js",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "oci-identity" : "2.98.0",
+    "oci-common" : "2.98.0"
+  }
+}
