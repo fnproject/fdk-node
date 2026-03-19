@@ -20,7 +20,7 @@ ARG FDK_VERSION
 
 # Install Node.js
 RUN microdnf module enable nodejs:22 && \
-    microdnf install -y --setopt=tsflags=nodocs nodejs npm && \
+    microdnf install -y --setopt=tsflags=nodocs nodejs npm gzip && \
     microdnf module reset nodejs:22 && \
     microdnf clean all && \
     rm -rf /var/cache/dnf
@@ -33,7 +33,26 @@ RUN groupadd --gid 1000 fn && adduser --uid 1000 --gid fn fn
 # Finally, we verify the new npm installation
 RUN npm --registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm \
       install -g npm@11.9.0 && \
+    mkdir -p /tmp/npm-patch /tmp/pkg-tar /tmp/pkg-minimatch-modern /tmp/pkg-minimatch-legacy /tmp/pkg-brace-expansion /tmp/pkg-balanced-match && \
+    cd /tmp/npm-patch && \
+    npm --registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm pack tar@7.5.10 minimatch@10.2.3 minimatch@9.0.7 brace-expansion@2.0.2 balanced-match@1.0.2 && \
+    tar -xzf /tmp/npm-patch/tar-7.5.10.tgz -C /tmp/pkg-tar && \
+    tar -xzf /tmp/npm-patch/minimatch-10.2.3.tgz -C /tmp/pkg-minimatch-modern && \
+    tar -xzf /tmp/npm-patch/minimatch-9.0.7.tgz -C /tmp/pkg-minimatch-legacy && \
+    tar -xzf /tmp/npm-patch/brace-expansion-2.0.2.tgz -C /tmp/pkg-brace-expansion && \
+    tar -xzf /tmp/npm-patch/balanced-match-1.0.2.tgz -C /tmp/pkg-balanced-match && \
+    rm -rf /usr/local/lib/node_modules/npm/node_modules/tar /usr/local/lib/node_modules/npm/node_modules/minimatch /usr/local/lib/node_modules/npm/node_modules/brace-expansion /usr/local/lib/node_modules/npm/node_modules/balanced-match && \
+    cp -R /tmp/pkg-tar/package /usr/local/lib/node_modules/npm/node_modules/tar && \
+    cp -R /tmp/pkg-minimatch-modern/package /usr/local/lib/node_modules/npm/node_modules/minimatch && \
+    cp -R /tmp/pkg-brace-expansion/package /usr/local/lib/node_modules/npm/node_modules/brace-expansion && \
+    cp -R /tmp/pkg-balanced-match/package /usr/local/lib/node_modules/npm/node_modules/balanced-match && \
+    if [ -d /usr/local/lib/node_modules/npm/node_modules/@tufjs/models/node_modules ]; then \
+      rm -rf /usr/local/lib/node_modules/npm/node_modules/@tufjs/models/node_modules/minimatch && \
+      cp -R /tmp/pkg-minimatch-legacy/package /usr/local/lib/node_modules/npm/node_modules/@tufjs/models/node_modules/minimatch; \
+    fi && \
+    rm -rf /tmp/npm-patch /tmp/pkg-tar /tmp/pkg-minimatch-modern /tmp/pkg-minimatch-legacy /tmp/pkg-brace-expansion /tmp/pkg-balanced-match && \
     rm -rf /usr/lib/node_modules && \
+    cd / && \
     npm cache clean --force && \
     npm --version
 
