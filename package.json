@@ -1,6 +1,6 @@
 {
   "name": "@fnproject/fdk",
-  "version": "0.0.91",
+  "version": "0.0.92",
   "description": "Function Developer Kit for Fn",
   "main": "fn-fdk.js",
   "scripts": {
