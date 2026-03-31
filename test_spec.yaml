@@ -131,7 +131,7 @@ steps:
     command: |
       set -ex
       if [[ "${RELEASE:-false}" == true ]]; then
-        declare -a node_versions=('22','24')
+        declare -a node_versions=('22' '24')
         declare -a suffixes=('' '-dev')
         for node in "${node_versions[@]}"; do
             for suffix in "${suffixes[@]}"; do
