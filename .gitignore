@@ -6,3 +6,7 @@ node_modules
 .npmrc
 *.tgz
 .oca/
+
+.csis
+internal/tests-images/node22/native-addon-code-only-fn-test/customer-native-addon/build/
+internal/tests-images/node24/native-addon-code-only-fn-test/customer-native-addon/build/
