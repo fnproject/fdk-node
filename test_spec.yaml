@@ -45,7 +45,7 @@ steps:
     name: Copy base images to OCIR
     command: |
       set -ex
-      declare -a node_versions=('22')
+      declare -a node_versions=('22' '24')
       declare -a suffixes=('' '-dev')
       for node in "${node_versions[@]}"; do
           for suffix in "${suffixes[@]}"; do
