@@ -29,5 +29,8 @@
     "standard": "17.1.2",
     "tape": "^5.9.0",
     "tmp": "^0.2.3"
+  },
+  "overrides": {
+    "minimatch": "3.1.3"
   }
 }

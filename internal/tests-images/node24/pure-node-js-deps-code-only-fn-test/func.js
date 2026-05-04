@@ -36,7 +36,7 @@ const fdk = require('@fnproject/fdk')
  * }
  *
  * Pinning:
- *  - lodash is expected to be pinned (e.g., 4.17.21) so the test can validate pinning behavior.
+ *  - lodash is expected to be pinned (e.g., 4.17.23) so the test can validate pinning behavior.
  *  - @fnproject/fdk is pinned (in package.json) so we can validate version integrity of the FDK itself.
  */
 fdk.handle(async function (input, ctx) {

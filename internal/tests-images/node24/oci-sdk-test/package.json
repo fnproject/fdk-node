@@ -1,5 +1,5 @@
 {
-  "name": "timeout-fn",
+  "name": "oci-sdk-fn",
   "version": "1.0.0",
   "description": "set timeout function",
   "main": "func.js",

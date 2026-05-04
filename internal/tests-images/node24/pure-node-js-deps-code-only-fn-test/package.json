@@ -3,7 +3,7 @@
   "private": true,
   "dependencies": {
     "@fnproject/fdk": "0.0.87",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "express": "^4.19.0",
     "axios": "^1.6.0",
     "uuid": "^9.0.0",

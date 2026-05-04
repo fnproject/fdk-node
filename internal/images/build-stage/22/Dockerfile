@@ -17,41 +17,18 @@
 FROM --platform=$TARGETPLATFORM ocr-docker-remote.artifactory.oci.oraclecorp.com/os/oraclelinux:9-slim
 
 RUN microdnf module enable nodejs:22 && \
-    microdnf install -y nodejs npm gzip && \
-    microdnf update -y nodejs nodejs-libs nodejs-full-i18n libnghttp2 && \
+    microdnf install nodejs npm && \
     microdnf module reset nodejs:22 && \
+    microdnf update -y && \
     microdnf clean all
 
 # The NPM version we get from the OS isn't necessarily up to date & may have insecure dependencies. We can use it to install the latest NPM version though. \
 # The new npm will be installed in /usr/local/lib and the the original is in /usr/lib and can now be removed
 # Finally, we verify the new npm installation
 
-RUN npm --registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm install -g npm@11.9.0 && \
-    mkdir -p /tmp/npm-patch /tmp/pkg-tar /tmp/pkg-minimatch-modern /tmp/pkg-minimatch-legacy /tmp/pkg-brace-expansion /tmp/pkg-balanced-match /tmp/pkg-picomatch && \
-    cd /tmp/npm-patch && \
-    npm --registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm pack tar@7.5.11 minimatch@10.2.3 minimatch@9.0.7 brace-expansion@2.0.3 balanced-match@1.0.2 picomatch@4.0.4 && \
-    tar -xzf /tmp/npm-patch/tar-7.5.11.tgz -C /tmp/pkg-tar && \
-    tar -xzf /tmp/npm-patch/minimatch-10.2.3.tgz -C /tmp/pkg-minimatch-modern && \
-    tar -xzf /tmp/npm-patch/minimatch-9.0.7.tgz -C /tmp/pkg-minimatch-legacy && \
-    tar -xzf /tmp/npm-patch/brace-expansion-2.0.3.tgz -C /tmp/pkg-brace-expansion && \
-    tar -xzf /tmp/npm-patch/balanced-match-1.0.2.tgz -C /tmp/pkg-balanced-match && \
-    tar -xzf /tmp/npm-patch/picomatch-4.0.4.tgz -C /tmp/pkg-picomatch && \
-    rm -rf /usr/local/lib/node_modules/npm/node_modules/tar /usr/local/lib/node_modules/npm/node_modules/minimatch /usr/local/lib/node_modules/npm/node_modules/brace-expansion /usr/local/lib/node_modules/npm/node_modules/balanced-match && \
-    cp -R /tmp/pkg-tar/package /usr/local/lib/node_modules/npm/node_modules/tar && \
-    cp -R /tmp/pkg-minimatch-modern/package /usr/local/lib/node_modules/npm/node_modules/minimatch && \
-    cp -R /tmp/pkg-brace-expansion/package /usr/local/lib/node_modules/npm/node_modules/brace-expansion && \
-    cp -R /tmp/pkg-balanced-match/package /usr/local/lib/node_modules/npm/node_modules/balanced-match && \
-    if [ -d /usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules ]; then \
-      rm -rf /usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules/picomatch && \
-      cp -R /tmp/pkg-picomatch/package /usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules/picomatch; \
-    fi && \
-    if [ -d /usr/local/lib/node_modules/npm/node_modules/@tufjs/models/node_modules ]; then \
-      rm -rf /usr/local/lib/node_modules/npm/node_modules/@tufjs/models/node_modules/minimatch && \
-      cp -R /tmp/pkg-minimatch-legacy/package /usr/local/lib/node_modules/npm/node_modules/@tufjs/models/node_modules/minimatch; \
-    fi && \
-    rm -rf /tmp/npm-patch /tmp/pkg-tar /tmp/pkg-minimatch-modern /tmp/pkg-minimatch-legacy /tmp/pkg-brace-expansion /tmp/pkg-balanced-match /tmp/pkg-picomatch && \
+RUN npm --registry=https://artifactory.oci.oraclecorp.com/api/npm/global-release-npm install -g npm@11.13.0 && \
     rm -r /usr/lib/node_modules && \
-    cd / && \
     npm --version
 
 CMD ["node"]
+
