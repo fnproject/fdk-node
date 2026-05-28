@@ -22,6 +22,7 @@ ARG FDK_VERSION
 RUN microdnf module enable nodejs:24 && \
     microdnf install -y --setopt=tsflags=nodocs nodejs npm && \
     microdnf module reset nodejs:24 && \
+    microdnf update -y && \
     microdnf clean all && \
     rm -rf /var/cache/dnf
 
