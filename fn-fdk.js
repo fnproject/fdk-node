@@ -261,16 +261,11 @@ function handleHTTPStream (fnfunction, options) {
   const inputMode = options != null ? (options.inputMode || 'json') : 'json'
 
   if (listenPort == null || !listenPort.startsWith('unix:')) {
-    console.error('Invalid configuration no FN_LISTENER variable set or invalid FN_LISTENER value', listenPort)
+    console.error('Invalid configuration no FN_LISTENER variable set or invalid FN_LISTENER value', +listenPort)
     process.exit(2)
   }
 
   const listenFile = listenPort.substr('unix:'.length)
-  if (listenFile === '' || !path.isAbsolute(listenFile) || listenFile.includes('\0')) {
-    console.error('Invalid configuration FN_LISTENER must be an absolute unix socket path', listenPort)
-    process.exit(2)
-  }
-
   const listenPath = path.dirname(listenFile)
 
   const tmpFileBaseName = path.basename(listenFile) + '.tmp'
